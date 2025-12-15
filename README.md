@@ -29,6 +29,9 @@ A powerful, browser-based synthesizer built with the Web Audio API. Create rich,
   - **Amplitude** (tremolo effects)
 
 ### ✨ Effects
+- **Distortion**: Harmonic saturation and drive (waveshaping)
+- **Chorus**: Lush, detuned textures with rate and depth controls
+- **Flanger**: Sweeping comb-filter effect with rate, depth, and feedback
 - **Delay**: Adjustable time, feedback, and mix
 - **Reverb**: Convolution-based spatial effects
 - Creates ambient textures and depth
@@ -91,7 +94,7 @@ That's it! No build process or dependencies required.
 3. **Shape with filters**: Use cutoff and resonance to sculpt the tone
 4. **Add movement**: Use LFO for vibrato, tremolo, or filter sweeps
 5. **Set envelope**: Control how notes start and end with ADSR
-6. **Add effects**: Delay and reverb for space and depth
+6. **Add effects**: Distortion for grit, chorus/flanger for movement, delay and reverb for space
 7. **Save your patch**: Name it and click "Save Custom Patch"
 
 ## 🎨 Sound Design Tips
@@ -150,6 +153,12 @@ LFO Modulation (pitch, filter, amplitude)
     ↓
 Amplitude Envelope (ADSR)
     ↓
+Distortion Effect
+    ↓
+Chorus Effect
+    ↓
+Flanger Effect
+    ↓
 Delay Effect
     ↓
 Reverb Effect
@@ -170,13 +179,12 @@ synthesiser/
 ├── synthesizer.js      # Synthesis engine and logic
 └── README.md          # This file
 ```
-
+phaser, compressor, EQ
 ## 🎯 Future Enhancements
 
 - [ ] Additional waveforms (PWM, FM synthesis)
 - [ ] Arpeggiator
 - [ ] Sequencer/pattern recorder
-- [ ] More effect types (chorus, flanger, distortion)
 - [ ] MIDI learn for CC mapping
 - [ ] Preset sharing/export
 - [ ] Oscilloscope view

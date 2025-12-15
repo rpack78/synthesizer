@@ -16,6 +16,18 @@ class Synthesizer {
         this.convolver = null;
         this.reverbWet = null;
         this.reverbDry = null;
+        this.distortion = null;
+        this.chorusDelay = null;
+        this.chorusLFO = null;
+        this.chorusLFOGain = null;
+        this.chorusWet = null;
+        this.chorusDry = null;
+        this.flangerDelay = null;
+        this.flangerLFO = null;
+        this.flangerLFOGain = null;
+        this.flangerFeedback = null;
+        this.flangerWet = null;
+        this.flangerDry = null;
         
         // Oscillator parameters
         this.osc1 = { wave: 'sawtooth', detune: 0, level: 1.0 };
@@ -55,7 +67,13 @@ class Synthesizer {
             delayTime: 0.3,
             delayFeedback: 0.3,
             delayMix: 0,
-            reverbMix: 0
+            reverbMix: 0,
+            distortionDrive: 0,
+            chorusRate: 0.5,
+            chorusDepth: 0,
+            flangerRate: 0.3,
+            flangerDepth: 0,
+            flangerFeedbackAmount: 0.5
         };
         
         this.masterVolume = 0.5;
@@ -377,9 +395,28 @@ class Synthesizer {
             this.masterGain = this.audioContext.createGain();
             this.masterGain.gain.value = this.masterVolume;
             
-            // Setup signal chain: masterGain -> delay -> reverb -> analyser -> destination
-            this.masterGain.connect(this.delayDry);
-            this.masterGain.connect(this.delayNode);
+            // Signal flow: master -> distortion -> chorus -> flanger -> delay -> reverb -> analyser -> output
+            this.masterGain.connect(this.distortion);
+            
+            // Chorus routing
+            this.distortion.connect(this.chorusDry);
+            this.distortion.connect(this.chorusDelay);
+            this.chorusDelay.connect(this.chorusWet);
+            
+            // Flanger routing (after chorus)
+            this.chorusDry.connect(this.flangerDry);
+            this.chorusWet.connect(this.flangerDry);
+            this.chorusDry.connect(this.flangerDelay);
+            this.chorusWet.connect(this.flangerDelay);
+            this.flangerDelay.connect(this.flangerWet);
+            this.flangerDelay.connect(this.flangerFeedback);
+            this.flangerFeedback.connect(this.flangerDelay);
+            
+            // Delay routing (after flanger)
+            this.flangerDry.connect(this.delayDry);
+            this.flangerWet.connect(this.delayDry);
+            this.flangerDry.connect(this.delayNode);
+            this.flangerWet.connect(this.delayNode);
             
             this.delayNode.connect(this.delayFeedback);
             this.delayFeedback.connect(this.delayNode);
@@ -401,6 +438,55 @@ class Synthesizer {
     }
     
     setupEffects() {
+        // Distortion
+        this.distortion = this.audioContext.createWaveShaper();
+        this.updateDistortionCurve(0);
+        
+        // Chorus
+        this.chorusDelay = this.audioContext.createDelay(0.05);
+        this.chorusDelay.delayTime.value = 0.025;
+        
+        this.chorusLFO = this.audioContext.createOscillator();
+        this.chorusLFO.frequency.value = this.effects.chorusRate;
+        this.chorusLFO.type = 'sine';
+        this.chorusLFO.start();
+        
+        this.chorusLFOGain = this.audioContext.createGain();
+        this.chorusLFOGain.gain.value = 0.002;
+        
+        this.chorusLFO.connect(this.chorusLFOGain);
+        this.chorusLFOGain.connect(this.chorusDelay.delayTime);
+        
+        this.chorusWet = this.audioContext.createGain();
+        this.chorusWet.gain.value = 0;
+        
+        this.chorusDry = this.audioContext.createGain();
+        this.chorusDry.gain.value = 1.0;
+        
+        // Flanger
+        this.flangerDelay = this.audioContext.createDelay(0.02);
+        this.flangerDelay.delayTime.value = 0.005;
+        
+        this.flangerLFO = this.audioContext.createOscillator();
+        this.flangerLFO.frequency.value = this.effects.flangerRate;
+        this.flangerLFO.type = 'sine';
+        this.flangerLFO.start();
+        
+        this.flangerLFOGain = this.audioContext.createGain();
+        this.flangerLFOGain.gain.value = 0.002;
+        
+        this.flangerLFO.connect(this.flangerLFOGain);
+        this.flangerLFOGain.connect(this.flangerDelay.delayTime);
+        
+        this.flangerFeedback = this.audioContext.createGain();
+        this.flangerFeedback.gain.value = this.effects.flangerFeedbackAmount;
+        
+        this.flangerWet = this.audioContext.createGain();
+        this.flangerWet.gain.value = 0;
+        
+        this.flangerDry = this.audioContext.createGain();
+        this.flangerDry.gain.value = 1.0;
+        
         // Delay effect
         this.delayNode = this.audioContext.createDelay(5.0);
         this.delayNode.delayTime.value = this.effects.delayTime;
@@ -438,6 +524,24 @@ class Synthesizer {
         }
         
         this.convolver.buffer = impulse;
+    }
+    
+    updateDistortionCurve(amount) {
+        const samples = 44100;
+        const curve = new Float32Array(samples);
+        const deg = Math.PI / 180;
+        const drive = amount / 100;
+        
+        for (let i = 0; i < samples; i++) {
+            const x = (i * 2 / samples) - 1;
+            if (drive === 0) {
+                curve[i] = x;
+            } else {
+                curve[i] = (3 + drive) * x * 20 * deg / (Math.PI + drive * Math.abs(x));
+            }
+        }
+        
+        this.distortion.curve = curve;
     }
     
     setupControls() {
@@ -479,6 +583,43 @@ class Synthesizer {
         this.setupSlider('lfo-amp-depth', (value) => this.lfo.ampDepth = parseFloat(value) / 100);
         
         // Effects controls
+        this.setupSlider('distortion-drive', (value) => {
+            this.effects.distortionDrive = parseFloat(value);
+            if (this.distortion) {
+                this.updateDistortionCurve(this.effects.distortionDrive);
+            }
+        });
+        this.setupSlider('chorus-rate', (value) => {
+            this.effects.chorusRate = parseFloat(value);
+            if (this.chorusLFO) {
+                this.chorusLFO.frequency.value = this.effects.chorusRate;
+            }
+        });
+        this.setupSlider('chorus-depth', (value) => {
+            this.effects.chorusDepth = parseFloat(value) / 100;
+            if (this.chorusWet && this.chorusDry) {
+                this.chorusWet.gain.value = this.effects.chorusDepth;
+            }
+        });
+        this.setupSlider('flanger-rate', (value) => {
+            this.effects.flangerRate = parseFloat(value);
+            if (this.flangerLFO) {
+                this.flangerLFO.frequency.value = this.effects.flangerRate;
+            }
+        });
+        this.setupSlider('flanger-depth', (value) => {
+            this.effects.flangerDepth = parseFloat(value) / 100;
+            if (this.flangerWet && this.flangerDry) {
+                this.flangerWet.gain.value = this.effects.flangerDepth;
+                this.flangerLFOGain.gain.value = 0.002 + (this.effects.flangerDepth * 0.003);
+            }
+        });
+        this.setupSlider('flanger-feedback', (value) => {
+            this.effects.flangerFeedbackAmount = parseFloat(value) / 100;
+            if (this.flangerFeedback) {
+                this.flangerFeedback.gain.value = this.effects.flangerFeedbackAmount;
+            }
+        });
         this.setupSlider('delay-time', (value) => {
             this.effects.delayTime = parseFloat(value);
             if (this.delayNode) this.delayNode.delayTime.value = this.effects.delayTime;
@@ -981,7 +1122,13 @@ class Synthesizer {
                 delayTime: this.effects.delayTime,
                 delayFeedback: this.effects.delayFeedback * 100,  // Convert to percentage for storage
                 delayMix: this.effects.delayMix * 100,  // Convert to percentage for storage
-                reverbMix: this.effects.reverbMix * 100  // Convert to percentage for storage
+                reverbMix: this.effects.reverbMix * 100,  // Convert to percentage for storage
+                distortionDrive: this.effects.distortionDrive,
+                chorusRate: this.effects.chorusRate,
+                chorusDepth: this.effects.chorusDepth * 100,
+                flangerRate: this.effects.flangerRate,
+                flangerDepth: this.effects.flangerDepth * 100,
+                flangerFeedbackAmount: this.effects.flangerFeedbackAmount * 100
             },
             masterVolume: this.masterVolume * 100  // Convert to percentage for storage
         };
@@ -1014,7 +1161,13 @@ class Synthesizer {
             delayTime: preset.effects.delayTime,
             delayFeedback: preset.effects.delayFeedback / 100,  // Convert from percentage
             delayMix: preset.effects.delayMix / 100,  // Convert from percentage
-            reverbMix: preset.effects.reverbMix / 100  // Convert from percentage
+            reverbMix: preset.effects.reverbMix / 100,  // Convert from percentage
+            distortionDrive: preset.effects.distortionDrive || 0,
+            chorusRate: preset.effects.chorusRate || 0.5,
+            chorusDepth: (preset.effects.chorusDepth || 0) / 100,
+            flangerRate: preset.effects.flangerRate || 0.3,
+            flangerDepth: (preset.effects.flangerDepth || 0) / 100,
+            flangerFeedbackAmount: (preset.effects.flangerFeedbackAmount || 50) / 100
         };
         this.masterVolume = preset.masterVolume / 100;  // Convert from percentage
         
@@ -1070,6 +1223,12 @@ class Synthesizer {
         this.updateUISlider('lfo-amp-depth', this.lfo.ampDepth * 100);
         
         // Effects
+        this.updateUISlider('distortion-drive', this.effects.distortionDrive);
+        this.updateUISlider('chorus-rate', this.effects.chorusRate);
+        this.updateUISlider('chorus-depth', this.effects.chorusDepth * 100);
+        this.updateUISlider('flanger-rate', this.effects.flangerRate);
+        this.updateUISlider('flanger-depth', this.effects.flangerDepth * 100);
+        this.updateUISlider('flanger-feedback', this.effects.flangerFeedbackAmount * 100);
         this.updateUISlider('delay-time', this.effects.delayTime);
         this.updateUISlider('delay-feedback', this.effects.delayFeedback * 100);
         this.updateUISlider('delay-mix', this.effects.delayMix * 100);

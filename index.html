@@ -312,8 +312,32 @@
 
             <!-- Effects Section -->
             <section class="control-section">
-                <h2>✨ Effects <span class="info-icon" title="Time-based effects add space, depth, and texture to your sound.">ℹ️</span></h2>
+                <h2>✨ Effects <span class="info-icon" title="Time-based and modulation effects add space, depth, and texture to your sound.">ℹ️</span></h2>
                 <div class="controls-grid">
+                    <div class="control-group">
+                        <label for="distortion-drive">Distortion: <span id="distortion-drive-value">0</span> <span class="info-icon" title="Adds harmonic saturation and grit. Low = warmth, high = aggressive.">ℹ️</span></label>
+                        <input type="range" id="distortion-drive" min="0" max="100" value="0">
+                    </div>
+                    <div class="control-group">
+                        <label for="chorus-rate">Chorus Rate: <span id="chorus-rate-value">0.5</span> Hz <span class="info-icon" title="Speed of chorus modulation. Creates thickness and width.">ℹ️</span></label>
+                        <input type="range" id="chorus-rate" min="0.1" max="5" step="0.1" value="0.5">
+                    </div>
+                    <div class="control-group">
+                        <label for="chorus-depth">Chorus Depth: <span id="chorus-depth-value">0</span> <span class="info-icon" title="Amount of chorus effect. Adds stereo width and shimmer.">ℹ️</span></label>
+                        <input type="range" id="chorus-depth" min="0" max="100" value="0">
+                    </div>
+                    <div class="control-group">
+                        <label for="flanger-rate">Flanger Rate: <span id="flanger-rate-value">0.3</span> Hz <span class="info-icon" title="Speed of flanger sweep. Creates jet/whoosh effects.">ℹ️</span></label>
+                        <input type="range" id="flanger-rate" min="0.1" max="5" step="0.1" value="0.3">
+                    </div>
+                    <div class="control-group">
+                        <label for="flanger-depth">Flanger Depth: <span id="flanger-depth-value">0</span> <span class="info-icon" title="Amount of flanger effect. Higher = more dramatic sweep.">ℹ️</span></label>
+                        <input type="range" id="flanger-depth" min="0" max="100" value="0">
+                    </div>
+                    <div class="control-group">
+                        <label for="flanger-feedback">Flanger Feedback: <span id="flanger-feedback-value">50</span>% <span class="info-icon" title="Resonance of flanger. Higher = more metallic character.">ℹ️</span></label>
+                        <input type="range" id="flanger-feedback" min="0" max="95" value="50">
+                    </div>
                     <div class="control-group">
                         <label for="delay-time">Delay Time: <span id="delay-time-value">0.3</span>s <span class="info-icon" title="Time between echo repeats. Match to tempo for rhythmic effects.">ℹ️</span></label>
                         <input type="range" id="delay-time" min="0" max="1" step="0.01" value="0.3">
