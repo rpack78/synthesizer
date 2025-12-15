@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Synthesizer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎹 Advanced Synthesizer</h1>
+            <p class="subtitle">Play with your mouse or keyboard keys (A-L for white keys, W-U for black keys)</p>
+        </header>
+
+        <!-- Presets Section -->
+        <section class="control-section preset-section full-width">
+                <h2>🎛️ Presets <span class="info-icon" title="Load built-in patches or save your own custom sounds. Presets store all synthesizer settings.">ℹ️</span></h2>
+                <div class="preset-controls">
+                    <div class="preset-row">
+                        <select id="preset-category" class="preset-select">
+                            <option value="bass">Bass</option>
+                            <option value="lead">Lead</option>
+                            <option value="pad">Pad</option>
+                            <option value="fx">Special FX</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                        <select id="preset-list" class="preset-select">
+                            <option value="0">Deep Sub Bass</option>
+                        </select>
+                        <button id="load-preset" class="preset-btn">Load Preset</button>
+                    </div>
+                    <div class="preset-row">
+                        <input type="text" id="preset-name" class="preset-input" placeholder="My Custom Patch" maxlength="30">
+                        <button id="save-preset" class="preset-btn save-btn">Save Custom Patch</button>
+                        <button id="delete-preset" class="preset-btn delete-btn">Delete</button>
+                    </div>
+                    <div id="preset-message" class="preset-message"></div>
+                </div>
+        </section>
+
+        <div class="keyboard-container">
+                <div class="keyboard" id="keyboard">
+                    <!-- First octave: C3 to B3 -->
+                    <div class="key white" data-note="C" data-octave-offset="0" data-key="z">
+                        <span class="key-label">C3</span>
+                        <span class="key-hint">Z</span>
+                    </div>
+                    <div class="key black" data-note="C#" data-octave-offset="0" data-key="s">
+                        <span class="key-label">C#</span>
+                        <span class="key-hint">S</span>
+                    </div>
+                    <div class="key white" data-note="D" data-octave-offset="0" data-key="x">
+                        <span class="key-label">D3</span>
+                        <span class="key-hint">X</span>
+                    </div>
+                    <div class="key black" data-note="D#" data-octave-offset="0" data-key="d">
+                        <span class="key-label">D#</span>
+                        <span class="key-hint">D</span>
+                    </div>
+                    <div class="key white" data-note="E" data-octave-offset="0" data-key="c">
+                        <span class="key-label">E3</span>
+                        <span class="key-hint">C</span>
+                    </div>
+                    <div class="key white" data-note="F" data-octave-offset="0" data-key="v">
+                        <span class="key-label">F3</span>
+                        <span class="key-hint">V</span>
+                    </div>
+                    <div class="key black" data-note="F#" data-octave-offset="0" data-key="g">
+                        <span class="key-label">F#</span>
+                        <span class="key-hint">G</span>
+                    </div>
+                    <div class="key white" data-note="G" data-octave-offset="0" data-key="b">
+                        <span class="key-label">G3</span>
+                        <span class="key-hint">B</span>
+                    </div>
+                    <div class="key black" data-note="G#" data-octave-offset="0" data-key="h">
+                        <span class="key-label">G#</span>
+                        <span class="key-hint">H</span>
+                    </div>
+                    <div class="key white" data-note="A" data-octave-offset="0" data-key="n">
+                        <span class="key-label">A3</span>
+                        <span class="key-hint">N</span>
+                    </div>
+                    <div class="key black" data-note="A#" data-octave-offset="0" data-key="j">
+                        <span class="key-label">A#</span>
+                        <span class="key-hint">J</span>
+                    </div>
+                    <div class="key white" data-note="B" data-octave-offset="0" data-key="m">
+                        <span class="key-label">B3</span>
+                        <span class="key-hint">M</span>
+                    </div>
+                    
+                    <!-- Second octave: C4 to C5 (13 keys) -->
+                    <div class="key white" data-note="C" data-octave-offset="1" data-key="q">
+                        <span class="key-label">C4</span>
+                        <span class="key-hint">Q</span>
+                    </div>
+                    <div class="key black" data-note="C#" data-octave-offset="1" data-key="2">
+                        <span class="key-label">C#</span>
+                        <span class="key-hint">2</span>
+                    </div>
+                    <div class="key white" data-note="D" data-octave-offset="1" data-key="w">
+                        <span class="key-label">D4</span>
+                        <span class="key-hint">W</span>
+                    </div>
+                    <div class="key black" data-note="D#" data-octave-offset="1" data-key="3">
+                        <span class="key-label">D#</span>
+                        <span class="key-hint">3</span>
+                    </div>
+                    <div class="key white" data-note="E" data-octave-offset="1" data-key="e">
+                        <span class="key-label">E4</span>
+                        <span class="key-hint">E</span>
+                    </div>
+                    <div class="key white" data-note="F" data-octave-offset="1" data-key="r">
+                        <span class="key-label">F4</span>
+                        <span class="key-hint">R</span>
+                    </div>
+                    <div class="key black" data-note="F#" data-octave-offset="1" data-key="5">
+                        <span class="key-label">F#</span>
+                        <span class="key-hint">5</span>
+                    </div>
+                    <div class="key white" data-note="G" data-octave-offset="1" data-key="t">
+                        <span class="key-label">G4</span>
+                        <span class="key-hint">T</span>
+                    </div>
+                    <div class="key black" data-note="G#" data-octave-offset="1" data-key="6">
+                        <span class="key-label">G#</span>
+                        <span class="key-hint">6</span>
+                    </div>
+                    <div class="key white" data-note="A" data-octave-offset="1" data-key="y">
+                        <span class="key-label">A4</span>
+                        <span class="key-hint">Y</span>
+                    </div>
+                    <div class="key black" data-note="A#" data-octave-offset="1" data-key="7">
+                        <span class="key-label">A#</span>
+                        <span class="key-hint">7</span>
+                    </div>
+                    <div class="key white" data-note="B" data-octave-offset="1" data-key="u">
+                        <span class="key-label">B4</span>
+                        <span class="key-hint">U</span>
+                    </div>
+                    <div class="key white" data-note="C" data-octave-offset="2" data-key="i">
+                        <span class="key-label">C5</span>
+                        <span class="key-hint">I</span>
+                    </div>
+                </div>
+        </div>
+
+        <div class="visualizer">
+            <canvas id="visualizer"></canvas>
+        </div>
+
+        <div class="synth-controls">
+            <!-- Oscillators Section -->
+            <section class="control-section">
+                <h2>🌊 Oscillators <span class="info-icon" title="Oscillators generate the raw sound waves. Mix multiple oscillators with different waveforms and detuning for rich, complex tones.">ℹ️</span></h2>
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label for="osc1-wave">OSC 1 Wave <span class="info-icon" title="Wave shape: Sine (pure), Square (hollow), Sawtooth (bright/buzzy), Triangle (mellow)">ℹ️</span></label>
+                        <select id="osc1-wave">
+                            <option value="sine">Sine</option>
+                            <option value="square">Square</option>
+                            <option value="sawtooth" selected>Sawtooth</option>
+                            <option value="triangle">Triangle</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="osc1-detune">OSC 1 Detune: <span id="osc1-detune-value">0</span> <span class="info-icon" title="Shifts pitch in cents. Use to create chorus/unison effects with other oscillators.">ℹ️</span></label>
+                        <input type="range" id="osc1-detune" min="-50" max="50" value="0">
+                    </div>
+                    <div class="control-group">
+                        <label for="osc1-level">OSC 1 Level: <span id="osc1-level-value">100</span>% <span class="info-icon" title="Volume mix of oscillator 1 in the final sound.">ℹ️</span></label>
+                        <input type="range" id="osc1-level" min="0" max="100" value="100">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="osc2-wave">OSC 2 Wave <span class="info-icon" title="Second oscillator waveform. Layer with OSC 1 for richer sounds.">ℹ️</span></label>
+                        <select id="osc2-wave">
+                            <option value="sine">Sine</option>
+                            <option value="square" selected>Square</option>
+                            <option value="sawtooth">Sawtooth</option>
+                            <option value="triangle">Triangle</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="osc2-detune">OSC 2 Detune: <span id="osc2-detune-value">7</span> <span class="info-icon" title="Slightly detune from OSC 1 (5-10 cents) for thick, analog-style sounds.">ℹ️</span></label>
+                        <input type="range" id="osc2-detune" min="-50" max="50" value="7">
+                    </div>
+                    <div class="control-group">
+                        <label for="osc2-level">OSC 2 Level: <span id="osc2-level-value">50</span>% <span class="info-icon" title="Volume mix of oscillator 2 in the final sound.">ℹ️</span></label>
+                        <input type="range" id="osc2-level" min="0" max="100" value="50">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="noise-level">Noise Level: <span id="noise-level-value">0</span>% <span class="info-icon" title="White noise generator. Great for breath, wind, or percussion sounds.">ℹ️</span></label>
+                        <input type="range" id="noise-level" min="0" max="100" value="0">
+                    </div>
+                    <div class="control-group">
+                        <label for="octave">Octave: <span id="octave-value">4</span> <span class="info-icon" title="Base octave for all oscillators. Lower for bass, higher for leads.">ℹ️</span></label>
+                        <input type="range" id="octave" min="2" max="6" value="4">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Filter Section -->
+            <section class="control-section">
+                <h2>🔊 Filter <span class="info-icon" title="Subtractive synthesis: Remove frequencies to shape the tone. Key to creating expressive, evolving sounds.">ℹ️</span></h2>
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label for="filter-type">Filter Type <span class="info-icon" title="Low Pass (removes highs), High Pass (removes lows), Band Pass (keeps middle), Notch (removes middle)">ℹ️</span></label>
+                        <select id="filter-type">
+                            <option value="lowpass" selected>Low Pass</option>
+                            <option value="highpass">High Pass</option>
+                            <option value="bandpass">Band Pass</option>
+                            <option value="notch">Notch</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="filter-cutoff">Cutoff: <span id="filter-cutoff-value">2000</span> Hz <span class="info-icon" title="Frequency where filtering begins. Lower = darker, higher = brighter.">ℹ️</span></label>
+                        <input type="range" id="filter-cutoff" min="20" max="20000" value="2000">
+                    </div>
+                    <div class="control-group">
+                        <label for="filter-resonance">Resonance: <span id="filter-resonance-value">1</span> <span class="info-icon" title="Emphasizes frequencies at cutoff. High values create classic synth 'screech'.">ℹ️</span></label>
+                        <input type="range" id="filter-resonance" min="0.1" max="30" step="0.1" value="1">
+                    </div>
+                    <div class="control-group">
+                        <label for="filter-env-amount">Env Amount: <span id="filter-env-amount-value">0</span> <span class="info-icon" title="How much the filter envelope modulates cutoff. Positive sweeps up, negative down.">ℹ️</span></label>
+                        <input type="range" id="filter-env-amount" min="-5000" max="5000" value="0">
+                    </div>
+                    <div class="control-group">
+                        <label for="filter-attack">Filter Attack: <span id="filter-attack-value">0.1</span>s <span class="info-icon" title="Time for filter sweep to reach peak after key press.">ℹ️</span></label>
+                        <input type="range" id="filter-attack" min="0" max="2" step="0.01" value="0.1">
+                    </div>
+                    <div class="control-group">
+                        <label for="filter-decay">Filter Decay: <span id="filter-decay-value">0.2</span>s <span class="info-icon" title="Time for filter sweep to return to cutoff frequency.">ℹ️</span></label>
+                        <input type="range" id="filter-decay" min="0" max="2" step="0.01" value="0.2">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Amplitude Envelope Section -->
+            <section class="control-section">
+                <h2>📊 Amplitude Envelope (ADSR) <span class="info-icon" title="Controls volume over time. Shapes how notes start, sustain, and end.">ℹ️</span></h2>
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label for="attack">Attack: <span id="attack-value">0.01</span>s <span class="info-icon" title="Time to reach full volume. Fast = percussive, slow = soft/pad-like.">ℹ️</span></label>
+                        <input type="range" id="attack" min="0" max="2" step="0.01" value="0.01">
+                    </div>
+                    <div class="control-group">
+                        <label for="decay">Decay: <span id="decay-value">0.1</span>s <span class="info-icon" title="Time to drop from peak to sustain level after attack.">ℹ️</span></label>
+                        <input type="range" id="decay" min="0" max="2" step="0.01" value="0.1">
+                    </div>
+                    <div class="control-group">
+                        <label for="sustain">Sustain: <span id="sustain-value">0.7</span> <span class="info-icon" title="Volume level while holding a key. 1.0 = full volume.">ℹ️</span></label>
+                        <input type="range" id="sustain" min="0" max="1" step="0.01" value="0.7">
+                    </div>
+                    <div class="control-group">
+                        <label for="release">Release: <span id="release-value">0.3</span>s <span class="info-icon" title="Fade-out time after releasing a key. Long = ambient tail.">ℹ️</span></label>
+                        <input type="range" id="release" min="0" max="3" step="0.01" value="0.3">
+                    </div>
+                </div>
+            </section>
+
+            <!-- LFO Section -->
+            <section class="control-section">
+                <h2>〰️ LFO (Modulation) <span class="info-icon" title="Low Frequency Oscillator adds movement and life. Creates vibrato, tremolo, and filter sweeps.">ℹ️</span></h2>
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label for="lfo-wave">LFO Wave <span class="info-icon" title="Modulation shape: Sine (smooth), Square (on/off), Saw (ramp), Triangle (linear up/down)">ℹ️</span></label>
+                        <select id="lfo-wave">
+                            <option value="sine" selected>Sine</option>
+                            <option value="square">Square</option>
+                            <option value="sawtooth">Sawtooth</option>
+                            <option value="triangle">Triangle</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="lfo-rate">LFO Rate: <span id="lfo-rate-value">5</span> Hz <span class="info-icon" title="Speed of modulation. Low = slow sweeps, high = wild wobbles.">ℹ️</span></label>
+                        <input type="range" id="lfo-rate" min="0.1" max="20" step="0.1" value="5">
+                    </div>
+                    <div class="control-group">
+                        <label for="lfo-pitch-depth">Pitch Depth: <span id="lfo-pitch-depth-value">0</span> <span class="info-icon" title="Vibrato amount. Modulates pitch up and down (15-30 = subtle vibrato).">ℹ️</span></label>
+                        <input type="range" id="lfo-pitch-depth" min="0" max="100" value="0">
+                    </div>
+                    <div class="control-group">
+                        <label for="lfo-filter-depth">Filter Depth: <span id="lfo-filter-depth-value">0</span> <span class="info-icon" title="Auto-wah amount. Sweeps filter cutoff (500-2500 = wah effect).">ℹ️</span></label>
+                        <input type="range" id="lfo-filter-depth" min="0" max="5000" value="0">
+                    </div>
+                    <div class="control-group">
+                        <label for="lfo-amp-depth">Amp Depth: <span id="lfo-amp-depth-value">0</span> <span class="info-icon" title="Tremolo amount. Modulates volume (20-40 = subtle pulsing).">ℹ️</span></label>
+                        <input type="range" id="lfo-amp-depth" min="0" max="100" value="0">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Effects Section -->
+            <section class="control-section">
+                <h2>✨ Effects <span class="info-icon" title="Time-based effects add space, depth, and texture to your sound.">ℹ️</span></h2>
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label for="delay-time">Delay Time: <span id="delay-time-value">0.3</span>s <span class="info-icon" title="Time between echo repeats. Match to tempo for rhythmic effects.">ℹ️</span></label>
+                        <input type="range" id="delay-time" min="0" max="1" step="0.01" value="0.3">
+                    </div>
+                    <div class="control-group">
+                        <label for="delay-feedback">Delay Feedback: <span id="delay-feedback-value">30</span>% <span class="info-icon" title="Number of echo repeats. Higher = more echoes.">ℹ️</span></label>
+                        <input type="range" id="delay-feedback" min="0" max="90" value="30">
+                    </div>
+                    <div class="control-group">
+                        <label for="delay-mix">Delay Mix: <span id="delay-mix-value">0</span>% <span class="info-icon" title="Blend of delay effect. 0 = off, 100 = all delay.">ℹ️</span></label>
+                        <input type="range" id="delay-mix" min="0" max="100" value="0">
+                    </div>
+                    <div class="control-group">
+                        <label for="reverb-mix">Reverb Mix: <span id="reverb-mix-value">0</span>% <span class="info-icon" title="Room/space effect. Low = tight, high = ambient/spacious.">ℹ️</span></label>
+                        <input type="range" id="reverb-mix" min="0" max="100" value="0">
+                    </div>
+                    <div class="control-group">
+                        <label for="master-volume">Master Volume: <span id="master-volume-value">50</span>% <span class="info-icon" title="Overall output level. Start at 50% and adjust to taste.">ℹ️</span></label>
+                        <input type="range" id="master-volume" min="0" max="100" value="50">
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="synthesizer.js"></script>
+</body>
+</html>
