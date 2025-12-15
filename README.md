@@ -37,11 +37,11 @@ A powerful, browser-based synthesizer built with the Web Audio API. Create rich,
 - Creates ambient textures and depth
 
 ### 🎛️ Preset System
-- **20 built-in presets** across 4 categories:
-  - 5 Bass patches
-  - 5 Lead patches
-  - 5 Pad patches
-  - 5 Special FX patches
+- **80 built-in presets** across 4 categories:
+  - 20 Bass patches
+  - 20 Lead patches
+  - 20 Pad patches
+  - 20 Special FX patches
 - **Save custom presets** with browser localStorage
 - **Import/Export** your sound designs
 
