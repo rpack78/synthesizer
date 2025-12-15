@@ -201,6 +201,81 @@ h1 {
     opacity: 1;
 }
 
+.midi-section {
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+    color: white;
+    margin-bottom: 20px;
+}
+
+.midi-section h2 {
+    color: white;
+    border-bottom-color: rgba(255, 255, 255, 0.3);
+}
+
+.midi-controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.midi-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 15px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    font-weight: 500;
+}
+
+.status-indicator {
+    font-size: 1.5em;
+    color: #ff4444;
+    transition: color 0.3s;
+}
+
+.status-indicator.connected {
+    color: #44ff44;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.midi-select {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px;
+    border: 2px solid white;
+    border-radius: 5px;
+    font-size: 1em;
+    background: white;
+    color: #333;
+    font-weight: 500;
+}
+
+.midi-select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.midi-message {
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.2);
+    display: none;
+    flex: 1;
+    min-width: 200px;
+}
+
+.midi-message.show {
+    display: block;
+}
+
 .controls-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));

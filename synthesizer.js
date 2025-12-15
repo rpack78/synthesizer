@@ -64,6 +64,11 @@ class Synthesizer {
         this.presets = this.initializePresets();
         this.customPresets = this.loadCustomPresets();
         
+        // MIDI support
+        this.midiAccess = null;
+        this.midiInputs = [];
+        this.activeNotes = new Map(); // Track MIDI note numbers to noteId mapping
+        
         // Note frequencies (A4 = 440Hz)
         this.noteFrequencies = {
             'C': 261.63,
@@ -354,6 +359,7 @@ class Synthesizer {
         this.setupKeyboard();
         this.setupVisualizer();
         this.setupPresetControls();
+        this.setupMIDI();
     }
     
     initAudioContext() {
@@ -1091,6 +1097,370 @@ class Synthesizer {
         const message = document.getElementById('preset-message');
         message.textContent = text;
         message.className = 'preset-message show';
+        message.style.background = type === 'success' 
+            ? 'rgba(76, 175, 80, 0.9)' 
+            : 'rgba(244, 67, 54, 0.9)';
+        
+        setTimeout(() => {
+            message.classList.remove('show');
+        }, 3000);
+    }
+    
+    setupMIDI() {
+        const connectBtn = document.getElementById('midi-connect-btn');
+        const deviceSelect = document.getElementById('midi-device-select');
+        
+        connectBtn.addEventListener('click', () => {
+            this.requestMIDIAccess();
+        });
+        
+        deviceSelect.addEventListener('change', (e) => {
+            this.selectMIDIDevice(e.target.value);
+        });
+    }
+    
+    async requestMIDIAccess() {
+        if (!navigator.requestMIDIAccess) {
+            this.showMIDIMessage('Web MIDI API not supported in this browser', 'error');
+            return;
+        }
+        
+        try {
+            this.midiAccess = await navigator.requestMIDIAccess();
+            this.showMIDIMessage('MIDI Access Granted!', 'success');
+            this.updateMIDIDeviceList();
+            
+            // Listen for device changes
+            this.midiAccess.onstatechange = () => {
+                this.updateMIDIDeviceList();
+            };
+        } catch (error) {
+            this.showMIDIMessage('MIDI Access Denied: ' + error.message, 'error');
+        }
+    }
+    
+    updateMIDIDeviceList() {
+        const deviceSelect = document.getElementById('midi-device-select');
+        const statusText = document.getElementById('midi-status-text');
+        const indicator = document.getElementById('midi-indicator');
+        
+        deviceSelect.innerHTML = '';
+        this.midiInputs = [];
+        
+        const inputs = Array.from(this.midiAccess.inputs.values());
+        
+        if (inputs.length === 0) {
+            deviceSelect.innerHTML = '<option value="">No MIDI devices found</option>';
+            deviceSelect.disabled = true;
+            statusText.textContent = 'No MIDI Devices';
+            indicator.classList.remove('connected');
+        } else {
+            deviceSelect.disabled = false;
+            inputs.forEach((input, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = input.name || `MIDI Device ${index + 1}`;
+                deviceSelect.appendChild(option);
+                this.midiInputs.push(input);
+            });
+            
+            // Auto-select first device
+            if (inputs.length > 0) {
+                this.selectMIDIDevice(0);
+            }
+        }
+    }
+    
+    selectMIDIDevice(index) {
+        // Disconnect all previous inputs
+        this.midiInputs.forEach(input => {
+            input.onmidimessage = null;
+        });
+        
+        if (index === '' || index < 0 || index >= this.midiInputs.length) {
+            return;
+        }
+        
+        const input = this.midiInputs[index];
+        const statusText = document.getElementById('midi-status-text');
+        const indicator = document.getElementById('midi-indicator');
+        
+        // Set up MIDI message handler
+        input.onmidimessage = (event) => {
+            this.handleMIDIMessage(event);
+        };
+        
+        statusText.textContent = `Connected: ${input.name || 'MIDI Device'}`;
+        indicator.classList.add('connected');
+        this.showMIDIMessage(`Using ${input.name || 'MIDI Device'}`, 'success');
+    }
+    
+    handleMIDIMessage(event) {
+        const [command, note, velocity] = event.data;
+        const channel = command & 0x0f;
+        const messageType = command & 0xf0;
+        
+        switch (messageType) {
+            case 0x90: // Note On
+                if (velocity > 0) {
+                    this.handleMIDINoteOn(note, velocity);
+                } else {
+                    this.handleMIDINoteOff(note);
+                }
+                break;
+            case 0x80: // Note Off
+                this.handleMIDINoteOff(note);
+                break;
+            case 0xB0: // Control Change
+                this.handleMIDIControlChange(note, velocity);
+                break;
+        }
+    }
+    
+    handleMIDINoteOn(midiNote, velocity) {
+        // Convert MIDI note to frequency
+        const frequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+        
+        // Find closest note name
+        const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const octave = Math.floor(midiNote / 12) - 1;
+        const noteName = noteNames[midiNote % 12];
+        
+        // Create a unique note ID for this MIDI note
+        const noteId = `midi_${midiNote}`;
+        
+        this.initAudioContext();
+        const now = this.audioContext.currentTime;
+        
+        // Create voice (similar to playNote but with MIDI frequency directly)
+        const voice = {
+            oscillators: [],
+            gainNodes: [],
+            filter: null,
+            filterEnvGain: null,
+            ampGain: null,
+            lfoOsc: null,
+            lfoGains: {}
+        };
+        
+        // Create filter
+        voice.filter = this.audioContext.createBiquadFilter();
+        voice.filter.type = this.filter.type;
+        voice.filter.frequency.value = this.filter.cutoff;
+        voice.filter.Q.value = this.filter.resonance;
+        
+        // Filter envelope modulation
+        if (this.filter.envAmount !== 0) {
+            const filterAttackEnd = now + this.filter.attack;
+            const filterDecayEnd = filterAttackEnd + this.filter.decay;
+            
+            voice.filter.frequency.setValueAtTime(this.filter.cutoff, now);
+            voice.filter.frequency.linearRampToValueAtTime(
+                this.filter.cutoff + this.filter.envAmount, 
+                filterAttackEnd
+            );
+            voice.filter.frequency.linearRampToValueAtTime(
+                this.filter.cutoff, 
+                filterDecayEnd
+            );
+        }
+        
+        // Create LFO
+        if (this.lfo.pitchDepth > 0 || this.lfo.filterDepth > 0 || this.lfo.ampDepth > 0) {
+            voice.lfoOsc = this.audioContext.createOscillator();
+            voice.lfoOsc.type = this.lfo.wave;
+            voice.lfoOsc.frequency.value = this.lfo.rate;
+            voice.lfoOsc.start(now);
+        }
+        
+        // Create oscillator 1
+        if (this.osc1.level > 0) {
+            const osc = this.audioContext.createOscillator();
+            osc.type = this.osc1.wave;
+            osc.frequency.value = frequency;
+            osc.detune.value = this.osc1.detune;
+            
+            const gain = this.audioContext.createGain();
+            gain.gain.value = this.osc1.level * (velocity / 127); // Velocity sensitive
+            
+            if (voice.lfoOsc && this.lfo.pitchDepth > 0) {
+                const lfoGain = this.audioContext.createGain();
+                lfoGain.gain.value = this.lfo.pitchDepth;
+                voice.lfoOsc.connect(lfoGain);
+                lfoGain.connect(osc.detune);
+            }
+            
+            osc.connect(gain);
+            gain.connect(voice.filter);
+            osc.start(now);
+            
+            voice.oscillators.push(osc);
+            voice.gainNodes.push(gain);
+        }
+        
+        // Create oscillator 2
+        if (this.osc2.level > 0) {
+            const osc = this.audioContext.createOscillator();
+            osc.type = this.osc2.wave;
+            osc.frequency.value = frequency;
+            osc.detune.value = this.osc2.detune;
+            
+            const gain = this.audioContext.createGain();
+            gain.gain.value = this.osc2.level * (velocity / 127);
+            
+            if (voice.lfoOsc && this.lfo.pitchDepth > 0) {
+                const lfoGain = this.audioContext.createGain();
+                lfoGain.gain.value = this.lfo.pitchDepth;
+                voice.lfoOsc.connect(lfoGain);
+                lfoGain.connect(osc.detune);
+            }
+            
+            osc.connect(gain);
+            gain.connect(voice.filter);
+            osc.start(now);
+            
+            voice.oscillators.push(osc);
+            voice.gainNodes.push(gain);
+        }
+        
+        // Create noise source
+        if (this.noiseLevel > 0) {
+            const bufferSize = this.audioContext.sampleRate * 2;
+            const noiseBuffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                output[i] = Math.random() * 2 - 1;
+            }
+            
+            const noise = this.audioContext.createBufferSource();
+            noise.buffer = noiseBuffer;
+            noise.loop = true;
+            
+            const noiseGain = this.audioContext.createGain();
+            noiseGain.gain.value = this.noiseLevel * (velocity / 127);
+            
+            noise.connect(noiseGain);
+            noiseGain.connect(voice.filter);
+            noise.start(now);
+            
+            voice.oscillators.push(noise);
+            voice.gainNodes.push(noiseGain);
+        }
+        
+        // LFO filter modulation
+        if (voice.lfoOsc && this.lfo.filterDepth > 0) {
+            const lfoFilterGain = this.audioContext.createGain();
+            lfoFilterGain.gain.value = this.lfo.filterDepth;
+            voice.lfoOsc.connect(lfoFilterGain);
+            lfoFilterGain.connect(voice.filter.frequency);
+        }
+        
+        // Create amplitude gain node with envelope
+        voice.ampGain = this.audioContext.createGain();
+        voice.ampGain.gain.value = 0;
+        
+        voice.filter.connect(voice.ampGain);
+        
+        // LFO amplitude modulation
+        if (voice.lfoOsc && this.lfo.ampDepth > 0) {
+            const lfoAmpGain = this.audioContext.createGain();
+            lfoAmpGain.gain.value = this.lfo.ampDepth;
+            voice.lfoOsc.connect(lfoAmpGain);
+            lfoAmpGain.connect(voice.ampGain.gain);
+        }
+        
+        voice.ampGain.connect(this.masterGain);
+        
+        // Amplitude ADSR Envelope
+        const attackEnd = now + this.ampEnv.attack;
+        const decayEnd = attackEnd + this.ampEnv.decay;
+        
+        voice.ampGain.gain.setValueAtTime(0, now);
+        voice.ampGain.gain.linearRampToValueAtTime(1, attackEnd);
+        voice.ampGain.gain.linearRampToValueAtTime(this.ampEnv.sustain, decayEnd);
+        
+        // Store voice with MIDI note number
+        this.activeVoices.set(noteId, voice);
+        this.activeNotes.set(midiNote, noteId);
+    }
+    
+    handleMIDINoteOff(midiNote) {
+        const noteId = this.activeNotes.get(midiNote);
+        if (!noteId || !this.activeVoices.has(noteId)) {
+            return;
+        }
+        
+        const voice = this.activeVoices.get(noteId);
+        const now = this.audioContext.currentTime;
+        
+        // Release envelope
+        voice.ampGain.gain.cancelScheduledValues(now);
+        voice.ampGain.gain.setValueAtTime(voice.ampGain.gain.value, now);
+        voice.ampGain.gain.linearRampToValueAtTime(0, now + this.ampEnv.release);
+        
+        // Stop all oscillators after release
+        voice.oscillators.forEach(osc => {
+            try {
+                osc.stop(now + this.ampEnv.release);
+            } catch (e) {}
+        });
+        
+        if (voice.lfoOsc) {
+            try {
+                voice.lfoOsc.stop(now + this.ampEnv.release);
+            } catch (e) {}
+        }
+        
+        this.activeVoices.delete(noteId);
+        this.activeNotes.delete(midiNote);
+    }
+    
+    handleMIDIControlChange(ccNumber, value) {
+        // Map common MIDI CC numbers to synthesizer parameters
+        const normalized = value / 127;
+        
+        switch (ccNumber) {
+            case 1: // Mod Wheel -> LFO Pitch Depth
+                this.lfo.pitchDepth = value * 0.78; // 0-100
+                this.updateUISlider('lfo-pitch-depth', value * 0.78);
+                break;
+            case 74: // Brightness -> Filter Cutoff
+                this.filter.cutoff = 20 + (normalized * 19980);
+                this.updateUISlider('filter-cutoff', this.filter.cutoff);
+                break;
+            case 71: // Resonance -> Filter Resonance
+                this.filter.resonance = 0.1 + (normalized * 29.9);
+                this.updateUISlider('filter-resonance', this.filter.resonance);
+                break;
+            case 73: // Attack Time
+                this.ampEnv.attack = normalized * 2;
+                this.updateUISlider('attack', this.ampEnv.attack);
+                break;
+            case 72: // Release Time
+                this.ampEnv.release = normalized * 3;
+                this.updateUISlider('release', this.ampEnv.release);
+                break;
+            case 7: // Volume
+                this.masterVolume = normalized;
+                this.updateUISlider('master-volume', value * 0.78);
+                if (this.masterGain) {
+                    this.masterGain.gain.value = this.masterVolume;
+                }
+                break;
+            case 91: // Reverb
+                this.effects.reverbMix = normalized;
+                this.updateUISlider('reverb-mix', value * 0.78);
+                if (this.reverbWet) {
+                    this.reverbWet.gain.value = this.effects.reverbMix;
+                }
+                break;
+        }
+    }
+    
+    showMIDIMessage(text, type) {
+        const message = document.getElementById('midi-message');
+        message.textContent = text;
+        message.className = 'midi-message show';
         message.style.background = type === 'success' 
             ? 'rgba(76, 175, 80, 0.9)' 
             : 'rgba(244, 67, 54, 0.9)';

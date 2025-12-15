@@ -13,6 +13,22 @@
             <p class="subtitle">Play with your mouse or keyboard keys (A-L for white keys, W-U for black keys)</p>
         </header>
 
+        <!-- MIDI Section -->
+        <section class="control-section midi-section full-width">
+            <h2>🎹 MIDI Controller <span class="info-icon" title="Connect a USB MIDI keyboard to play the synthesizer. MIDI CC messages can control parameters.">ℹ️</span></h2>
+            <div class="midi-controls">
+                <div class="midi-status" id="midi-status">
+                    <span class="status-indicator" id="midi-indicator">●</span>
+                    <span id="midi-status-text">MIDI Not Connected</span>
+                </div>
+                <select id="midi-device-select" class="midi-select" disabled>
+                    <option value="">No MIDI devices found</option>
+                </select>
+                <button id="midi-connect-btn" class="preset-btn">Enable MIDI</button>
+                <div id="midi-message" class="midi-message"></div>
+            </div>
+        </section>
+
         <!-- Presets Section -->
         <section class="control-section preset-section full-width">
                 <h2>🎛️ Presets <span class="info-icon" title="Load built-in patches or save your own custom sounds. Presets store all synthesizer settings.">ℹ️</span></h2>
