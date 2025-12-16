@@ -166,7 +166,12 @@ export class PresetManager {
           this.audioEngine.effects.flangerFeedbackAmount * 100,
       },
       masterVolume: this.audioEngine.masterVolume * 100,
-      maxVolume: this.audioEngine.maxVolume * 100,
+      limiter: {
+        gain: this.audioEngine.limiter.gain,
+        ceiling: this.audioEngine.limiter.ceiling,
+        lookahead: this.audioEngine.limiter.lookahead,
+        release: this.audioEngine.limiter.release,
+      },
     };
   }
 
@@ -208,7 +213,11 @@ export class PresetManager {
       flangerFeedbackAmount: (preset.effects.flangerFeedbackAmount || 50) / 100,
     };
     this.audioEngine.masterVolume = preset.masterVolume / 100;
-    this.audioEngine.maxVolume = (preset.maxVolume || 100) / 100;
+
+    // Load limiter settings (with defaults for backward compatibility)
+    if (preset.limiter) {
+      this.audioEngine.limiter = { ...preset.limiter };
+    }
 
     // Update audio nodes if initialized
     if (this.audioEngine.audioContext) {
@@ -220,7 +229,12 @@ export class PresetManager {
       this.audioEngine.reverbWet.gain.value =
         this.audioEngine.effects.reverbMix;
       this.audioEngine.masterGain.gain.value = this.audioEngine.masterVolume;
-      this.audioEngine.limiterGain.gain.value = this.audioEngine.maxVolume;
+
+      // Update limiter
+      this.audioEngine.updateLimiterGain();
+      this.audioEngine.setLimiterCeiling(this.audioEngine.limiter.ceiling);
+      this.audioEngine.setLimiterLookahead(this.audioEngine.limiter.lookahead);
+      this.audioEngine.setLimiterRelease(this.audioEngine.limiter.release);
     }
 
     // Update UI
@@ -295,7 +309,36 @@ export class PresetManager {
     this.updateUISlider("delay-mix", this.audioEngine.effects.delayMix * 100);
     this.updateUISlider("reverb-mix", this.audioEngine.effects.reverbMix * 100);
     this.updateUISlider("master-volume", this.audioEngine.masterVolume * 100);
-    this.updateUISlider("max-volume", this.audioEngine.maxVolume * 100);
+
+    // Update limiter UI
+    this.updateUISlider("limiter-gain", this.audioEngine.limiter.gain);
+    this.updateUISlider("limiter-ceiling", this.audioEngine.limiter.ceiling);
+    this.updateUISlider(
+      "limiter-lookahead",
+      this.audioEngine.limiter.lookahead
+    );
+    this.updateUISlider("limiter-release", this.audioEngine.limiter.release);
+
+    // Update limiter display values
+    const gainValue = document.getElementById("limiter-gain-value");
+    if (gainValue)
+      gainValue.textContent = `${this.audioEngine.limiter.gain.toFixed(2)} dB`;
+
+    const ceilingValue = document.getElementById("limiter-ceiling-value");
+    if (ceilingValue)
+      ceilingValue.textContent = `${this.audioEngine.limiter.ceiling.toFixed(
+        2
+      )} dB`;
+
+    const lookaheadValue = document.getElementById("limiter-lookahead-value");
+    if (lookaheadValue)
+      lookaheadValue.textContent = `${this.audioEngine.limiter.lookahead.toFixed(
+        2
+      )} ms`;
+
+    const releaseValue = document.getElementById("limiter-release-value");
+    if (releaseValue)
+      releaseValue.textContent = `${this.audioEngine.limiter.release} ms`;
   }
 
   updateUIControl(id, value) {

@@ -61,6 +61,47 @@
       </div>
     </section>
 
+    <!-- Limiter Section -->
+    <section class="limiter-section">
+      <div class="limiter-container">
+        <h3 class="limiter-title">Limiter</h3>
+        <div class="limiter-controls">
+          <div class="limiter-control">
+            <label>Gain</label>
+            <div class="limiter-value" id="limiter-gain-value">0.00 dB</div>
+            <input type="range" id="limiter-gain" min="-12" max="12" step="0.1" value="0">
+          </div>
+          <div class="limiter-control ceiling-control">
+            <label>Ceiling</label>
+            <div class="limiter-value-row">
+              <div class="limiter-value" id="limiter-ceiling-value">-0.30 dB</div>
+              <div class="stereo-indicator">Stereo</div>
+            </div>
+            <input type="range" id="limiter-ceiling" min="-20" max="0" step="0.1" value="-0.3">
+          </div>
+          <div class="limiter-control">
+            <label>Lookahead</label>
+            <div class="limiter-value" id="limiter-lookahead-value">0.00 ms</div>
+            <input type="range" id="limiter-lookahead" min="0" max="10" step="0.1" value="0">
+          </div>
+          <div class="limiter-control">
+            <label>Release</label>
+            <div class="limiter-value-row">
+              <div class="limiter-value" id="limiter-release-value">300 ms</div>
+              <div class="auto-indicator">Auto</div>
+            </div>
+            <input type="range" id="limiter-release" min="10" max="1000" step="10" value="300">
+          </div>
+        </div>
+        <div class="limiter-meter">
+          <div class="meter-bar" id="limiter-meter-bar"></div>
+          <div class="meter-labels">
+            <span>-6</span><span>-12</span><span>-18</span><span>-24</span><span>-30</span><span>-36</span><span>-42</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <div class="keyboard-container">
       <div class="keyboard" id="keyboard">
         <!-- First octave: C3 to B3 -->
@@ -411,11 +452,6 @@
             <label for="master-volume">Master Volume: <span id="master-volume-value">50</span>% <span class="info-icon"
                 title="Overall output level. Start at 50% and adjust to taste.">ℹ️</span></label>
             <input type="range" id="master-volume" min="0" max="100" value="50">
-          </div>
-          <div class="control-group">
-            <label for="max-volume">Max Volume Limiter: <span id="max-volume-value">100</span>% <span class="info-icon"
-                title="Limit the maximum output level to prevent clipping. Lower this if you see the clipping indicator light up.">ℹ️</span></label>
-            <input type="range" id="max-volume" min="0" max="100" value="100">
           </div>
         </div>
       </section>

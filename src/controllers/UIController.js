@@ -201,11 +201,37 @@ export class UIController {
       this.audioEngine.setMasterVolume(value / 100);
     });
 
-    this.setupSlider("max-volume", (value) => {
-      this.audioEngine.maxVolume = value / 100;
-      if (this.audioEngine.limiterGain) {
-        this.audioEngine.limiterGain.gain.value = this.audioEngine.maxVolume;
-      }
+    // Limiter controls
+    this.setupSlider("limiter-gain", (value) => {
+      const gainDb = parseFloat(value);
+      this.audioEngine.setLimiterGain(gainDb);
+      document.getElementById(
+        "limiter-gain-value"
+      ).textContent = `${gainDb.toFixed(2)} dB`;
+    });
+
+    this.setupSlider("limiter-ceiling", (value) => {
+      const ceilingDb = parseFloat(value);
+      this.audioEngine.setLimiterCeiling(ceilingDb);
+      document.getElementById(
+        "limiter-ceiling-value"
+      ).textContent = `${ceilingDb.toFixed(2)} dB`;
+    });
+
+    this.setupSlider("limiter-lookahead", (value) => {
+      const lookaheadMs = parseFloat(value);
+      this.audioEngine.setLimiterLookahead(lookaheadMs);
+      document.getElementById(
+        "limiter-lookahead-value"
+      ).textContent = `${lookaheadMs.toFixed(2)} ms`;
+    });
+
+    this.setupSlider("limiter-release", (value) => {
+      const releaseMs = parseFloat(value);
+      this.audioEngine.setLimiterRelease(releaseMs);
+      document.getElementById(
+        "limiter-release-value"
+      ).textContent = `${releaseMs} ms`;
     });
   }
 
@@ -219,10 +245,12 @@ export class UIController {
   setupSlider(id, callback) {
     const slider = document.getElementById(id);
     const valueDisplay = document.getElementById(`${id}-value`);
-    if (slider && valueDisplay) {
+    if (slider) {
       slider.addEventListener("input", (e) => {
         const value = e.target.value;
-        valueDisplay.textContent = value;
+        if (valueDisplay) {
+          valueDisplay.textContent = value;
+        }
         callback(value);
       });
     }

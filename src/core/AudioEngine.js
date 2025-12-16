@@ -5,6 +5,8 @@ export class AudioEngine {
     this.audioContext = null;
     this.masterGain = null;
     this.limiterGain = null;
+    this.limiterCompressor = null;
+    this.hardClipper = null;
     this.analyser = null;
 
     // Effects nodes
@@ -43,7 +45,14 @@ export class AudioEngine {
     };
 
     this.masterVolume = 0.5;
-    this.maxVolume = 1.0;
+
+    // Limiter parameters
+    this.limiter = {
+      gain: 0, // dB (-12 to +12)
+      ceiling: -0.3, // dB (-20 to 0)
+      lookahead: 0, // ms (0 to 10)
+      release: 300, // ms (10 to 1000)
+    };
   }
 
   initialize() {
@@ -63,9 +72,23 @@ export class AudioEngine {
     this.masterGain = this.audioContext.createGain();
     this.masterGain.gain.value = this.masterVolume;
 
-    // Add limiter gain node
+    // Create proper limiter using DynamicsCompressorNode
+    // Input gain for makeup gain
     this.limiterGain = this.audioContext.createGain();
-    this.limiterGain.gain.value = this.maxVolume;
+    this.updateLimiterGain();
+
+    // Compressor configured as a brick-wall limiter
+    this.limiterCompressor = this.audioContext.createDynamicsCompressor();
+    // Ultra-aggressive settings for true brick-wall limiting
+    this.limiterCompressor.threshold.value = -0.1; // Just below 0 dB
+    this.limiterCompressor.knee.value = 0; // Hard knee for limiting
+    this.limiterCompressor.ratio.value = 20; // High ratio for smooth compression
+    this.limiterCompressor.attack.value = 0.001; // Ultra-fast attack (1ms)
+    this.limiterCompressor.release.value = this.limiter.release / 1000; // Convert ms to seconds
+
+    // Hard clipper as final safety - absolutely prevents exceeding ceiling
+    this.hardClipper = this.audioContext.createWaveShaper();
+    this.updateHardClipperCurve();
 
     // Connect the effects chain
     this.connectEffectsChain();
@@ -181,11 +204,15 @@ export class AudioEngine {
     this.reverbDry.connect(this.convolver);
     this.convolver.connect(this.reverbWet);
 
-    this.reverbDry.connect(this.analyser);
-    this.reverbWet.connect(this.analyser);
+    this.reverbDry.connect(this.limiterGain);
+    this.reverbWet.connect(this.limiterGain);
 
-    this.analyser.connect(this.limiterGain);
-    this.limiterGain.connect(this.audioContext.destination);
+    this.limiterGain.connect(this.limiterCompressor);
+    this.limiterCompressor.connect(this.hardClipper);
+
+    // Analyser after limiter to see actual output level
+    this.hardClipper.connect(this.analyser);
+    this.analyser.connect(this.audioContext.destination);
   }
 
   createReverbImpulse() {
@@ -241,5 +268,72 @@ export class AudioEngine {
     const now = this.audioContext.currentTime;
     this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, now);
     this.masterGain.gain.linearRampToValueAtTime(targetGain, now + 0.01);
+  }
+
+  // Limiter control methods
+  updateLimiterGain() {
+    if (this.limiterGain) {
+      // Convert dB to linear gain
+      const gainLinear = Math.pow(10, this.limiter.gain / 20);
+      this.limiterGain.gain.value = gainLinear;
+    }
+  }
+
+  updateHardClipperCurve() {
+    if (this.hardClipper) {
+      // Create a hard clipping curve at the ceiling level
+      // This absolutely prevents any signal from exceeding the ceiling
+      const samples = 4096;
+      const curve = new Float32Array(samples);
+
+      // Convert ceiling dB to linear amplitude
+      const ceilingLinear = Math.pow(10, this.limiter.ceiling / 20);
+
+      // Create hard clipping curve
+      for (let i = 0; i < samples; i++) {
+        const x = (i * 2) / samples - 1; // Range: -1 to 1
+
+        // Hard clip at ceiling level
+        if (x > ceilingLinear) {
+          curve[i] = ceilingLinear;
+        } else if (x < -ceilingLinear) {
+          curve[i] = -ceilingLinear;
+        } else {
+          curve[i] = x;
+        }
+      }
+
+      this.hardClipper.curve = curve;
+      this.hardClipper.oversample = "4x"; // High quality oversampling to reduce aliasing
+    }
+  }
+
+  setLimiterGain(gainDb) {
+    this.limiter.gain = gainDb;
+    this.updateLimiterGain();
+  }
+
+  setLimiterCeiling(ceilingDb) {
+    this.limiter.ceiling = ceilingDb;
+    // Don't change compressor threshold - keep it at -0.1 dB for smooth compression
+    // The hard clipper enforces the actual ceiling
+    this.updateHardClipperCurve();
+  }
+
+  setLimiterLookahead(lookaheadMs) {
+    this.limiter.lookahead = lookaheadMs;
+    if (this.limiterCompressor) {
+      // Attack time simulates lookahead (convert ms to seconds)
+      // Minimum 0.001s (1ms) for ultra-fast limiting
+      this.limiterCompressor.attack.value = Math.max(0.001, lookaheadMs / 1000);
+    }
+  }
+
+  setLimiterRelease(releaseMs) {
+    this.limiter.release = releaseMs;
+    if (this.limiterCompressor) {
+      // Convert ms to seconds
+      this.limiterCompressor.release.value = releaseMs / 1000;
+    }
   }
 }
