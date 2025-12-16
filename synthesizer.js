@@ -711,8 +711,30 @@ class Synthesizer {
     // Store voice
     this.activeVoices.set(noteId, voice);
 
+    // Update master gain for polyphony compensation
+    this.updateMasterGainForPolyphony();
+
     // Visual feedback
     keyElement.classList.add("active");
+  }
+
+  updateMasterGainForPolyphony() {
+    // Adjust master gain based on number of active voices to prevent clipping
+    const numVoices = this.activeVoices.size;
+    if (numVoices === 0) {
+      return;
+    }
+    
+    // Apply polyphony compensation: scale down gain as more voices are added
+    // Use a gentle curve to avoid too much volume reduction
+    const compensationFactor = Math.min(1, 0.5 + 0.5 / Math.sqrt(numVoices));
+    const targetGain = this.masterVolume * compensationFactor;
+    
+    if (this.audioContext) {
+      const now = this.audioContext.currentTime;
+      this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, now);
+      this.masterGain.gain.linearRampToValueAtTime(targetGain, now + 0.01);
+    }
   }
 
   stopNote(noteId, keyElement) {
@@ -746,8 +768,11 @@ class Synthesizer {
       }
     }
 
-    // Clean up
-    this.activeVoices.delete(noteId);
+    // Clean up after release time
+    setTimeout(() => {
+      this.activeVoices.delete(noteId);
+      this.updateMasterGainForPolyphony();
+    }, this.ampEnv.release * 1000 + 50);
 
     // Visual feedback
     keyElement.classList.remove("active");
