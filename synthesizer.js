@@ -528,6 +528,17 @@ class Synthesizer {
         this.stopNote(noteId, element);
       }
     });
+
+    // Stop all keyboard notes when window loses focus to prevent stuck notes
+    window.addEventListener("blur", () => {
+      pressedKeys.forEach((key) => {
+        if (keyMap.has(key)) {
+          const { noteId, element } = keyMap.get(key);
+          this.stopNote(noteId, element);
+        }
+      });
+      pressedKeys.clear();
+    });
   }
 
   getFrequency(note) {
@@ -540,8 +551,29 @@ class Synthesizer {
   playNote(note, keyElement, octaveOffset = 0) {
     const noteId = `${note}_${octaveOffset}`;
 
+    // If note is already playing, stop it first
     if (this.activeVoices.has(noteId)) {
-      return; // Already playing
+      const oldVoice = this.activeVoices.get(noteId);
+      // Cancel any pending cleanup
+      if (oldVoice.cleanupTimeout) {
+        clearTimeout(oldVoice.cleanupTimeout);
+      }
+      if (oldVoice.safetyTimeout) {
+        clearTimeout(oldVoice.safetyTimeout);
+      }
+      // Stop oscillators immediately
+      const now = this.audioContext.currentTime;
+      oldVoice.oscillators.forEach((osc) => {
+        try {
+          osc.stop(now);
+        } catch (e) {}
+      });
+      if (oldVoice.lfoOsc) {
+        try {
+          oldVoice.lfoOsc.stop(now);
+        } catch (e) {}
+      }
+      this.activeVoices.delete(noteId);
     }
 
     this.initAudioContext();
@@ -714,6 +746,13 @@ class Synthesizer {
     // Update master gain for polyphony compensation
     this.updateMasterGainForPolyphony();
 
+    // Safety timeout: auto-stop note after 60 seconds to prevent stuck notes
+    voice.safetyTimeout = setTimeout(() => {
+      if (this.activeVoices.has(noteId)) {
+        this.stopNote(noteId, keyElement);
+      }
+    }, 60000);
+
     // Visual feedback
     keyElement.classList.add("active");
   }
@@ -745,6 +784,11 @@ class Synthesizer {
     const voice = this.activeVoices.get(noteId);
     const now = this.audioContext.currentTime;
 
+    // Clear safety timeout
+    if (voice.safetyTimeout) {
+      clearTimeout(voice.safetyTimeout);
+    }
+
     // Release envelope
     voice.ampGain.gain.cancelScheduledValues(now);
     voice.ampGain.gain.setValueAtTime(voice.ampGain.gain.value, now);
@@ -768,10 +812,18 @@ class Synthesizer {
       }
     }
 
-    // Clean up after release time
-    setTimeout(() => {
-      this.activeVoices.delete(noteId);
-      this.updateMasterGainForPolyphony();
+    // Remove from active voices immediately to allow replaying
+    this.activeVoices.delete(noteId);
+    this.updateMasterGainForPolyphony();
+
+    // Schedule cleanup of audio nodes after release
+    voice.cleanupTimeout = setTimeout(() => {
+      // Disconnect nodes to free memory
+      try {
+        voice.ampGain.disconnect();
+        voice.filter.disconnect();
+        voice.gainNodes.forEach(g => g.disconnect());
+      } catch (e) {}
     }, this.ampEnv.release * 1000 + 50);
 
     // Visual feedback
@@ -1229,6 +1281,11 @@ class Synthesizer {
   }
 
   handleMIDINoteOn(midiNote, velocity) {
+    // If this MIDI note is already playing, stop it first
+    if (this.activeNotes.has(midiNote)) {
+      this.handleMIDINoteOff(midiNote);
+    }
+
     // Convert MIDI note to frequency
     const frequency = 440 * Math.pow(2, (midiNote - 69) / 12);
 
@@ -1414,6 +1471,16 @@ class Synthesizer {
     // Store voice with MIDI note number
     this.activeVoices.set(noteId, voice);
     this.activeNotes.set(midiNote, noteId);
+
+    // Update master gain for polyphony compensation
+    this.updateMasterGainForPolyphony();
+
+    // Safety timeout: auto-stop note after 60 seconds to prevent stuck notes
+    voice.safetyTimeout = setTimeout(() => {
+      if (this.activeVoices.has(noteId)) {
+        this.handleMIDINoteOff(midiNote);
+      }
+    }, 60000);
   }
 
   handleMIDINoteOff(midiNote) {
@@ -1424,6 +1491,11 @@ class Synthesizer {
 
     const voice = this.activeVoices.get(noteId);
     const now = this.audioContext.currentTime;
+
+    // Clear safety timeout
+    if (voice.safetyTimeout) {
+      clearTimeout(voice.safetyTimeout);
+    }
 
     // Release envelope
     voice.ampGain.gain.cancelScheduledValues(now);
@@ -1443,8 +1515,20 @@ class Synthesizer {
       } catch (e) {}
     }
 
+    // Remove from active voices immediately to allow replaying
     this.activeVoices.delete(noteId);
     this.activeNotes.delete(midiNote);
+    this.updateMasterGainForPolyphony();
+
+    // Schedule cleanup of audio nodes after release
+    voice.cleanupTimeout = setTimeout(() => {
+      // Disconnect nodes to free memory
+      try {
+        voice.ampGain.disconnect();
+        voice.filter.disconnect();
+        voice.gainNodes.forEach(g => g.disconnect());
+      } catch (e) {}
+    }, this.ampEnv.release * 1000 + 50);
   }
 
   handleMIDIControlChange(ccNumber, value) {
