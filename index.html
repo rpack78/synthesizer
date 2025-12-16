@@ -171,6 +171,9 @@
 
     <div class="visualizer">
       <canvas id="visualizer"></canvas>
+      <div class="clipping-indicator" id="clipping-indicator">
+        <span class="clip-label">CLIP</span>
+      </div>
     </div>
 
     <div class="synth-controls">
@@ -408,6 +411,11 @@
             <label for="master-volume">Master Volume: <span id="master-volume-value">50</span>% <span class="info-icon"
                 title="Overall output level. Start at 50% and adjust to taste.">ℹ️</span></label>
             <input type="range" id="master-volume" min="0" max="100" value="50">
+          </div>
+          <div class="control-group">
+            <label for="max-volume">Max Volume Limiter: <span id="max-volume-value">100</span>% <span class="info-icon"
+                title="Limit the maximum output level to prevent clipping. Lower this if you see the clipping indicator light up.">ℹ️</span></label>
+            <input type="range" id="max-volume" min="0" max="100" value="100">
           </div>
         </div>
       </section>

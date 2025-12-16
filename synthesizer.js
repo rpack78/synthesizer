@@ -79,6 +79,9 @@ class Synthesizer {
     };
 
     this.masterVolume = 0.5;
+    this.maxVolume = 1.0; // Max volume limiter
+    this.isClipping = false;
+    this.clipTimeout = null;
 
     // Preset system
     this.presets = this.initializePresets();
@@ -156,6 +159,10 @@ class Synthesizer {
       this.masterGain = this.audioContext.createGain();
       this.masterGain.gain.value = this.masterVolume;
 
+      // Add limiter gain node
+      this.limiterGain = this.audioContext.createGain();
+      this.limiterGain.gain.value = this.maxVolume;
+
       // Signal flow: master -> distortion -> chorus -> flanger -> delay -> reverb -> analyser -> output
       this.masterGain.connect(this.distortion);
 
@@ -192,7 +199,9 @@ class Synthesizer {
       this.reverbDry.connect(this.analyser);
       this.reverbWet.connect(this.analyser);
 
-      this.analyser.connect(this.audioContext.destination);
+      // Connect analyser through limiter to destination
+      this.analyser.connect(this.limiterGain);
+      this.limiterGain.connect(this.audioContext.destination);
 
       this.startVisualizer();
     }
@@ -449,6 +458,12 @@ class Synthesizer {
     this.setupSlider("master-volume", (value) => {
       this.masterVolume = value / 100;
       if (this.masterGain) this.masterGain.gain.value = this.masterVolume;
+    });
+
+    // Max volume limiter control
+    this.setupSlider("max-volume", (value) => {
+      this.maxVolume = value / 100;
+      if (this.limiterGain) this.limiterGain.gain.value = this.maxVolume;
     });
   }
 
@@ -763,12 +778,12 @@ class Synthesizer {
     if (numVoices === 0) {
       return;
     }
-    
+
     // Apply polyphony compensation: scale down gain as more voices are added
     // Use a gentle curve to avoid too much volume reduction
     const compensationFactor = Math.min(1, 0.5 + 0.5 / Math.sqrt(numVoices));
     const targetGain = this.masterVolume * compensationFactor;
-    
+
     if (this.audioContext) {
       const now = this.audioContext.currentTime;
       this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, now);
@@ -822,7 +837,7 @@ class Synthesizer {
       try {
         voice.ampGain.disconnect();
         voice.filter.disconnect();
-        voice.gainNodes.forEach(g => g.disconnect());
+        voice.gainNodes.forEach((g) => g.disconnect());
       } catch (e) {}
     }, this.ampEnv.release * 1000 + 50);
 
@@ -848,11 +863,38 @@ class Synthesizer {
   startVisualizer() {
     const bufferLength = this.analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
+    const clippingIndicator = document.getElementById("clipping-indicator");
 
     const draw = () => {
       requestAnimationFrame(draw);
 
       this.analyser.getByteTimeDomainData(dataArray);
+
+      // Check for clipping (values at or near 0 or 255)
+      let isClipping = false;
+      const clipThreshold = 250; // Close to max value of 255
+      for (let i = 0; i < bufferLength; i++) {
+        if (
+          dataArray[i] >= clipThreshold ||
+          dataArray[i] <= 255 - clipThreshold
+        ) {
+          isClipping = true;
+          break;
+        }
+      }
+
+      // Update clipping indicator
+      if (isClipping) {
+        clippingIndicator.classList.add("active");
+        // Clear any existing timeout
+        if (this.clipTimeout) {
+          clearTimeout(this.clipTimeout);
+        }
+        // Keep indicator active for a short duration
+        this.clipTimeout = setTimeout(() => {
+          clippingIndicator.classList.remove("active");
+        }, 200);
+      }
 
       const ctx = this.visualizerContext;
       const width = this.visualizerCanvas.width;
@@ -1029,6 +1071,7 @@ class Synthesizer {
         flangerFeedbackAmount: this.effects.flangerFeedbackAmount * 100,
       },
       masterVolume: this.masterVolume * 100, // Convert to percentage for storage
+      maxVolume: this.maxVolume * 100, // Convert to percentage for storage
     };
   }
 
@@ -1068,6 +1111,7 @@ class Synthesizer {
       flangerFeedbackAmount: (preset.effects.flangerFeedbackAmount || 50) / 100,
     };
     this.masterVolume = preset.masterVolume / 100; // Convert from percentage
+    this.maxVolume = (preset.maxVolume || 100) / 100; // Convert from percentage, default to 100%
 
     // Update all UI controls
     this.updateUIFromSettings();
@@ -1079,6 +1123,7 @@ class Synthesizer {
       this.delayWet.gain.value = this.effects.delayMix;
       this.reverbWet.gain.value = this.effects.reverbMix;
       this.masterGain.gain.value = this.masterVolume;
+      this.limiterGain.gain.value = this.maxVolume;
     }
   }
 
@@ -1135,6 +1180,7 @@ class Synthesizer {
     this.updateUISlider("delay-mix", this.effects.delayMix * 100);
     this.updateUISlider("reverb-mix", this.effects.reverbMix * 100);
     this.updateUISlider("master-volume", this.masterVolume * 100);
+    this.updateUISlider("max-volume", this.maxVolume * 100);
   }
 
   updateUIControl(id, value) {
@@ -1526,7 +1572,7 @@ class Synthesizer {
       try {
         voice.ampGain.disconnect();
         voice.filter.disconnect();
-        voice.gainNodes.forEach(g => g.disconnect());
+        voice.gainNodes.forEach((g) => g.disconnect());
       } catch (e) {}
     }, this.ampEnv.release * 1000 + 50);
   }
