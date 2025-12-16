@@ -290,7 +290,6 @@ class Synthesizer {
   updateDistortionCurve(amount) {
     const samples = 44100;
     const curve = new Float32Array(samples);
-    const deg = Math.PI / 180;
     const drive = amount / 100;
 
     for (let i = 0; i < samples; i++) {
@@ -298,8 +297,9 @@ class Synthesizer {
       if (drive === 0) {
         curve[i] = x;
       } else {
-        curve[i] =
-          ((3 + drive) * x * 20 * deg) / (Math.PI + drive * Math.abs(x));
+        // Apply distortion using tanh-like curve
+        const k = drive * 50; // Scale the drive amount
+        curve[i] = ((3 + k) * x) / (Math.PI + k * Math.abs(x));
       }
     }
 
