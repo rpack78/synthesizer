@@ -2,25 +2,71 @@
 
 A powerful, browser-based synthesizer built with the Web Audio API. Create rich, complex sounds through subtractive synthesis, modulation, and effects processing.
 
+## 📁 Project Structure
+
+The codebase is organized into modular folders for maintainability:
+
+### Root Files
+
+- **index.html** - Main HTML structure
+- **README.md** - Project documentation
+
+### Source Files (`src/`)
+
+#### Core (`src/core/`)
+
+- **synthesizer.js** - Main orchestrator that initializes all modules
+- **AudioEngine.js** - Audio context, effects chain, and audio node management
+- **VoiceManager.js** - Voice/note playback and polyphony handling
+
+#### Controllers (`src/controllers/`)
+
+- **MIDIController.js** - MIDI input handling and mapping
+- **UIController.js** - User interface controls and keyboard input
+
+#### Managers (`src/managers/`)
+
+- **PresetManager.js** - Preset loading, saving, and management
+
+#### Visualization (`src/visualization/`)
+
+- **Visualizer.js** - Waveform visualization and clipping detection
+
+#### Utilities (`src/utils/`)
+
+- **utils.js** - Utility functions (frequency calculations, messaging)
+
+#### Data (`src/data/`)
+
+- **presets.js** - Built-in preset data
+
+### Styles (`css/`)
+
+- **styles.css** - Styling and layout
+
 ## ✨ Features
 
 ### 🌊 Multi-Oscillator Sound Generation
+
 - **2 independent oscillators** with 4 waveforms each (Sine, Square, Sawtooth, Triangle)
 - **Detune control** for thick, chorused sounds
 - **White noise generator** for texture and percussion
 - **Individual level mixing** for each sound source
 
 ### 🔊 Subtractive Synthesis
+
 - **4 filter types**: Low-pass, High-pass, Band-pass, Notch
 - **Cutoff frequency** control (20Hz - 20kHz)
 - **Resonance** for classic synth character
 - **Filter envelope** with dedicated Attack/Decay for dynamic filtering
 
 ### 📊 ADSR Envelope
+
 - Full **Attack, Decay, Sustain, Release** control
 - Shapes amplitude over time for expressive playing
 
 ### 〰️ LFO Modulation
+
 - **4 LFO waveforms** for varied modulation shapes
 - **Rate control** from 0.1 to 20 Hz
 - Modulation targets:
@@ -29,6 +75,7 @@ A powerful, browser-based synthesizer built with the Web Audio API. Create rich,
   - **Amplitude** (tremolo effects)
 
 ### ✨ Effects
+
 - **Distortion**: Harmonic saturation and drive (waveshaping)
 - **Chorus**: Lush, detuned textures with rate and depth controls
 - **Flanger**: Sweeping comb-filter effect with rate, depth, and feedback
@@ -37,6 +84,7 @@ A powerful, browser-based synthesizer built with the Web Audio API. Create rich,
 - Creates ambient textures and depth
 
 ### 🎛️ Preset System
+
 - **80 built-in presets** across 4 categories:
   - 20 Bass patches
   - 20 Lead patches
@@ -46,6 +94,7 @@ A powerful, browser-based synthesizer built with the Web Audio API. Create rich,
 - **Import/Export** your sound designs
 
 ### 🎹 MIDI Controller Support
+
 - **USB MIDI keyboard** input with velocity sensitivity
 - **Device selection** for multiple controllers
 - **MIDI CC mapping** for real-time parameter control:
@@ -58,12 +107,14 @@ A powerful, browser-based synthesizer built with the Web Audio API. Create rich,
   - CC 91 → Reverb Mix
 
 ### 🎵 Playable Interface
+
 - **25-key virtual keyboard** (2 octaves)
 - **Computer keyboard** support (Z-M, Q-U, I for 25 keys)
 - **Visual feedback** for active notes
 - **Real-time waveform visualizer**
 
 ### ℹ️ Built-in Help System
+
 - Info icons throughout the interface
 - Tooltips explaining each parameter
 - Tips for sound design and typical value ranges
@@ -71,7 +122,9 @@ A powerful, browser-based synthesizer built with the Web Audio API. Create rich,
 ## 🚀 Getting Started
 
 ### Installation
+
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/yourusername/synthesiser.git
    cd synthesiser
@@ -84,11 +137,13 @@ That's it! No build process or dependencies required.
 ### Using the Synthesizer
 
 #### Playing Notes
+
 - **Mouse**: Click on the keyboard keys
 - **Computer Keyboard**: Use keys Z through I for a 25-key range
 - **MIDI Controller**: Click "Enable MIDI" and select your device
 
 #### Creating Sounds
+
 1. **Start with a preset**: Select a category and preset from the dropdown
 2. **Adjust oscillators**: Mix waveforms and detune for richness
 3. **Shape with filters**: Use cutoff and resonance to sculpt the tone
@@ -102,12 +157,14 @@ That's it! No build process or dependencies required.
 ### Classic Sounds
 
 **Bass**:
+
 - Low octave (2-3)
 - Sawtooth or square waves
 - Low-pass filter with moderate resonance
 - Short attack, medium release
 
 **Lead**:
+
 - Higher octave (4-5)
 - Detuned sawtooth oscillators
 - Filter envelope with positive modulation
@@ -115,6 +172,7 @@ That's it! No build process or dependencies required.
 - Add delay for depth
 
 **Pad**:
+
 - Slow attack (0.8-1.5s)
 - Long release (1.5-2.5s)
 - Multiple detuned oscillators
@@ -122,6 +180,7 @@ That's it! No build process or dependencies required.
 - Heavy reverb and delay
 
 **Effects**:
+
 - Experiment with extreme settings
 - High resonance on filters
 - Fast LFO rates
@@ -130,6 +189,7 @@ That's it! No build process or dependencies required.
 ## 🛠️ Technical Details
 
 ### Built With
+
 - **Web Audio API** - Sound synthesis and processing
 - **Web MIDI API** - MIDI controller support
 - **HTML5 Canvas** - Real-time waveform visualization
@@ -137,6 +197,7 @@ That's it! No build process or dependencies required.
 - **CSS3** - Modern, responsive interface
 
 ### Browser Support
+
 - ✅ Chrome/Chromium (recommended)
 - ✅ Edge
 - ✅ Opera
@@ -144,6 +205,7 @@ That's it! No build process or dependencies required.
 - ⚠️ Safari (MIDI support limited)
 
 ### Audio Architecture
+
 ```
 Oscillators (×2) + Noise
     ↓
@@ -179,7 +241,9 @@ synthesiser/
 ├── synthesizer.js      # Synthesis engine and logic
 └── README.md          # This file
 ```
+
 phaser, compressor, EQ
+
 ## 🎯 Future Enhancements
 
 - [ ] Additional waveforms (PWM, FM synthesis)
