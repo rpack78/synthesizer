@@ -62,10 +62,15 @@
     </section>
 
     <!-- Limiter Section -->
-    <section class="limiter-section">
+    <section class="control-section rack-section">
       <div class="limiter-container">
-        <h3 class="limiter-title">Limiter</h3>
+        <h3 class="limiter-title">Limiter / Master</h3>
         <div class="limiter-controls">
+          <div class="limiter-control">
+            <label>Master Volume</label>
+            <div class="limiter-value" id="master-volume-value">50%</div>
+            <input type="range" id="master-volume" min="0" max="100" value="50">
+          </div>
           <div class="limiter-control">
             <label>Gain</label>
             <div class="limiter-value" id="limiter-gain-value">0.00 dB</div>
@@ -97,6 +102,426 @@
           <div class="meter-bar" id="limiter-meter-bar"></div>
           <div class="meter-labels">
             <span>-6</span><span>-12</span><span>-18</span><span>-24</span><span>-30</span><span>-36</span><span>-42</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Oscillators Section -->
+    <section class="control-section rack-section">
+      <div class="effects-container oscillators-container">
+        <h3 class="effects-title">Oscillators</h3>
+        <div class="oscillator-selectors">
+          <div class="osc-selector">
+            <label>OSC 1</label>
+            <select id="osc1-wave">
+              <option value="sine">Sine</option>
+              <option value="square">Square</option>
+              <option value="sawtooth" selected>Sawtooth</option>
+              <option value="triangle">Triangle</option>
+            </select>
+          </div>
+          <div class="osc-selector">
+            <label>OSC 2</label>
+            <select id="osc2-wave">
+              <option value="sine">Sine</option>
+              <option value="square" selected>Square</option>
+              <option value="sawtooth">Sawtooth</option>
+              <option value="triangle">Triangle</option>
+            </select>
+          </div>
+        </div>
+        <div class="effects-knobs">
+          <div class="knob-control">
+            <label>OSC 1 Detune</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="osc1-detune" data-min="-50" data-max="50" data-value="0">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="osc1-detune-display">0</div>
+            </div>
+          </div>
+          <div class="knob-control">
+            <label>OSC 1 Level</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="osc1-level" data-min="0" data-max="100" data-value="100">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="osc1-level-display">100%</div>
+            </div>
+          </div>
+          <div class="knob-control">
+            <label>OSC 2 Detune</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="osc2-detune" data-min="-50" data-max="50" data-value="7">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="osc2-detune-display">7</div>
+            </div>
+          </div>
+          <div class="knob-control">
+            <label>OSC 2 Level</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="osc2-level" data-min="0" data-max="100" data-value="50">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="osc2-level-display">50%</div>
+            </div>
+          </div>
+          <div class="knob-control">
+            <label>Noise</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="noise-level" data-min="0" data-max="100" data-value="0">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="noise-level-display">0%</div>
+            </div>
+          </div>
+          <div class="knob-control">
+            <label>Octave</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="octave" data-min="2" data-max="6" data-value="4">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="octave-display">4</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filter Section -->
+    <section class="control-section rack-section">
+      <div class="effects-container filters-container">
+        <h3 class="effects-title">Filter</h3>
+        <div class="filter-type-selector">
+          <select id="filter-type">
+            <option value="lowpass" selected>Low Pass</option>
+            <option value="highpass">High Pass</option>
+            <option value="bandpass">Band Pass</option>
+            <option value="notch">Notch</option>
+          </select>
+        </div>
+        <div class="effects-knobs">
+          <div class="knob-control">
+            <label>Cutoff</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="filter-cutoff" data-min="20" data-max="20000"
+                data-value="2000">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="filter-cutoff-display">2000Hz</div>
+            </div>
+          </div>
+          <div class="knob-control">
+            <label>Resonance</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="filter-resonance" data-min="0.1" data-max="30"
+                data-value="1" data-step="0.1">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="filter-resonance-display">1.0</div>
+            </div>
+          </div>
+          <div class="knob-control">
+            <label>Env Amount</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="filter-env-amount" data-min="-5000" data-max="5000"
+                data-value="0">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="filter-env-amount-display">0</div>
+            </div>
+          </div>
+          <div class="knob-control">
+            <label>Attack</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="filter-attack" data-min="0" data-max="2" data-value="0.1"
+                data-step="0.01">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="filter-attack-display">0.1s</div>
+            </div>
+          </div>
+          <div class="knob-control">
+            <label>Decay</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="filter-decay" data-min="0" data-max="2" data-value="0.2"
+                data-step="0.01">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="filter-decay-display">0.2s</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LFO Section -->
+    <section class="control-section rack-section">
+      <div class="effects-container lfo-container">
+        <h3 class="effects-title">LFO (Modulation)</h3>
+        <div class="filter-type-selector">
+          <select id="lfo-wave">
+            <option value="sine" selected>Sine</option>
+            <option value="square">Square</option>
+            <option value="sawtooth">Sawtooth</option>
+            <option value="triangle">Triangle</option>
+          </select>
+        </div>
+        <div class="effects-knobs">
+          <div class="knob-control">
+            <label>Rate</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="lfo-rate" data-min="0.1" data-max="20" data-value="5"
+                data-step="0.1">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="lfo-rate-display">5.0</div>
+            </div>
+          </div>
+          <div class="knob-control">
+            <label>Pitch Depth</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="lfo-pitch-depth" data-min="0" data-max="100"
+                data-value="0">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="lfo-pitch-depth-display">0</div>
+            </div>
+          </div>
+          <div class="knob-control">
+            <label>Filter Depth</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="lfo-filter-depth" data-min="0" data-max="5000"
+                data-value="0">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="lfo-filter-depth-display">0</div>
+            </div>
+          </div>
+          <div class="knob-control">
+            <label>Amp Depth</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="lfo-amp-depth" data-min="0" data-max="100"
+                data-value="0">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="lfo-amp-depth-display">0%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADSR Section -->
+    <section class="control-section rack-section">
+      <div class="effects-container adsr-container">
+        <h3 class="effects-title">ADSR Envelope</h3>
+        <div class="effects-knobs">
+          <div class="knob-control">
+            <label>Attack</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="attack" data-min="0" data-max="2" data-value="0.01"
+                data-step="0.01">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="attack-display">0.01s</div>
+            </div>
+          </div>
+          <div class="knob-control">
+            <label>Decay</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="decay" data-min="0" data-max="2" data-value="0.1"
+                data-step="0.01">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="decay-display">0.1s</div>
+            </div>
+          </div>
+          <div class="knob-control">
+            <label>Sustain</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="sustain" data-min="0" data-max="1" data-value="0.7"
+                data-step="0.01">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="sustain-display">0.70</div>
+            </div>
+          </div>
+          <div class="knob-control">
+            <label>Release</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="release" data-min="0" data-max="3" data-value="0.3"
+                data-step="0.01">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="release-display">0.30s</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Effects Section -->
+    <section class="control-section rack-section">
+      <div class="effects-container">
+        <h3 class="effects-title">Effects</h3>
+        <div class="effects-knobs">
+          <div class="knob-control">
+            <label>Distortion</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="distortion-drive" data-min="0" data-max="100"
+                data-value="0">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="distortion-drive-display">0</div>
+            </div>
+          </div>
+          <div class="knob-control">
+            <label>Chorus Rate</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="chorus-rate" data-min="0.1" data-max="5" data-value="0.5"
+                data-step="0.1">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="chorus-rate-display">0.5</div>
+            </div>
+          </div>
+          <div class="knob-control">
+            <label>Chorus Depth</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="chorus-depth" data-min="0" data-max="100" data-value="0">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="chorus-depth-display">0%</div>
+            </div>
+          </div>
+          <div class="knob-control">
+            <label>Flanger Rate</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="flanger-rate" data-min="0.1" data-max="5"
+                data-value="0.3" data-step="0.1">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="flanger-rate-display">0.3</div>
+            </div>
+          </div>
+          <div class="knob-control">
+            <label>Flanger Depth</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="flanger-depth" data-min="0" data-max="100"
+                data-value="0">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="flanger-depth-display">0%</div>
+            </div>
+          </div>
+          <div class="knob-control">
+            <label>Flanger FB</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="flanger-feedback" data-min="0" data-max="95"
+                data-value="50">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="flanger-feedback-display">50%</div>
+            </div>
+          </div>
+          <div class="knob-control">
+            <label>Delay Time</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="delay-time" data-min="0" data-max="1" data-value="0.3"
+                data-step="0.01">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="delay-time-display">0.3s</div>
+            </div>
+          </div>
+          <div class="knob-control">
+            <label>Delay FB</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="delay-feedback" data-min="0" data-max="90"
+                data-value="30">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="delay-feedback-display">30%</div>
+            </div>
+          </div>
+          <div class="knob-control">
+            <label>Delay Mix</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="delay-mix" data-min="0" data-max="100" data-value="0">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="delay-mix-display">0%</div>
+            </div>
+          </div>
+          <div class="knob-control">
+            <label>Reverb Mix</label>
+            <div class="knob-wrapper">
+              <svg class="knob" viewBox="0 0 100 100" data-id="reverb-mix" data-min="0" data-max="100" data-value="0">
+                <circle class="knob-track" cx="50" cy="50" r="40"></circle>
+                <path class="knob-fill" d="" stroke-linecap="round"></path>
+                <circle class="knob-handle" cx="50" cy="10" r="6"></circle>
+              </svg>
+              <div class="knob-value" id="reverb-mix-display">0%</div>
+            </div>
           </div>
         </div>
       </div>
@@ -215,246 +640,6 @@
       <div class="clipping-indicator" id="clipping-indicator">
         <span class="clip-label">CLIP</span>
       </div>
-    </div>
-
-    <div class="synth-controls">
-      <!-- Oscillators Section -->
-      <section class="control-section">
-        <h2>🌊 Oscillators <span class="info-icon"
-            title="Oscillators generate the raw sound waves. Mix multiple oscillators with different waveforms and detuning for rich, complex tones.">ℹ️</span>
-        </h2>
-        <div class="controls-grid">
-          <div class="control-group">
-            <label for="osc1-wave">OSC 1 Wave <span class="info-icon"
-                title="Wave shape: Sine (pure), Square (hollow), Sawtooth (bright/buzzy), Triangle (mellow)">ℹ️</span></label>
-            <select id="osc1-wave">
-              <option value="sine">Sine</option>
-              <option value="square">Square</option>
-              <option value="sawtooth" selected>Sawtooth</option>
-              <option value="triangle">Triangle</option>
-            </select>
-          </div>
-          <div class="control-group">
-            <label for="osc1-detune">OSC 1 Detune: <span id="osc1-detune-value">0</span> <span class="info-icon"
-                title="Shifts pitch in cents. Use to create chorus/unison effects with other oscillators.">ℹ️</span></label>
-            <input type="range" id="osc1-detune" min="-50" max="50" value="0">
-          </div>
-          <div class="control-group">
-            <label for="osc1-level">OSC 1 Level: <span id="osc1-level-value">100</span>% <span class="info-icon"
-                title="Volume mix of oscillator 1 in the final sound.">ℹ️</span></label>
-            <input type="range" id="osc1-level" min="0" max="100" value="100">
-          </div>
-
-          <div class="control-group">
-            <label for="osc2-wave">OSC 2 Wave <span class="info-icon"
-                title="Second oscillator waveform. Layer with OSC 1 for richer sounds.">ℹ️</span></label>
-            <select id="osc2-wave">
-              <option value="sine">Sine</option>
-              <option value="square" selected>Square</option>
-              <option value="sawtooth">Sawtooth</option>
-              <option value="triangle">Triangle</option>
-            </select>
-          </div>
-          <div class="control-group">
-            <label for="osc2-detune">OSC 2 Detune: <span id="osc2-detune-value">7</span> <span class="info-icon"
-                title="Slightly detune from OSC 1 (5-10 cents) for thick, analog-style sounds.">ℹ️</span></label>
-            <input type="range" id="osc2-detune" min="-50" max="50" value="7">
-          </div>
-          <div class="control-group">
-            <label for="osc2-level">OSC 2 Level: <span id="osc2-level-value">50</span>% <span class="info-icon"
-                title="Volume mix of oscillator 2 in the final sound.">ℹ️</span></label>
-            <input type="range" id="osc2-level" min="0" max="100" value="50">
-          </div>
-
-          <div class="control-group">
-            <label for="noise-level">Noise Level: <span id="noise-level-value">0</span>% <span class="info-icon"
-                title="White noise generator. Great for breath, wind, or percussion sounds.">ℹ️</span></label>
-            <input type="range" id="noise-level" min="0" max="100" value="0">
-          </div>
-          <div class="control-group">
-            <label for="octave">Octave: <span id="octave-value">4</span> <span class="info-icon"
-                title="Base octave for all oscillators. Lower for bass, higher for leads.">ℹ️</span></label>
-            <input type="range" id="octave" min="2" max="6" value="4">
-          </div>
-        </div>
-      </section>
-
-      <!-- Filter Section -->
-      <section class="control-section">
-        <h2>🔊 Filter <span class="info-icon"
-            title="Subtractive synthesis: Remove frequencies to shape the tone. Key to creating expressive, evolving sounds.">ℹ️</span>
-        </h2>
-        <div class="controls-grid">
-          <div class="control-group">
-            <label for="filter-type">Filter Type <span class="info-icon"
-                title="Low Pass (removes highs), High Pass (removes lows), Band Pass (keeps middle), Notch (removes middle)">ℹ️</span></label>
-            <select id="filter-type">
-              <option value="lowpass" selected>Low Pass</option>
-              <option value="highpass">High Pass</option>
-              <option value="bandpass">Band Pass</option>
-              <option value="notch">Notch</option>
-            </select>
-          </div>
-          <div class="control-group">
-            <label for="filter-cutoff">Cutoff: <span id="filter-cutoff-value">2000</span> Hz <span class="info-icon"
-                title="Frequency where filtering begins. Lower = darker, higher = brighter.">ℹ️</span></label>
-            <input type="range" id="filter-cutoff" min="20" max="20000" value="2000">
-          </div>
-          <div class="control-group">
-            <label for="filter-resonance">Resonance: <span id="filter-resonance-value">1</span> <span class="info-icon"
-                title="Emphasizes frequencies at cutoff. High values create classic synth 'screech'.">ℹ️</span></label>
-            <input type="range" id="filter-resonance" min="0.1" max="30" step="0.1" value="1">
-          </div>
-          <div class="control-group">
-            <label for="filter-env-amount">Env Amount: <span id="filter-env-amount-value">0</span> <span
-                class="info-icon"
-                title="How much the filter envelope modulates cutoff. Positive sweeps up, negative down.">ℹ️</span></label>
-            <input type="range" id="filter-env-amount" min="-5000" max="5000" value="0">
-          </div>
-          <div class="control-group">
-            <label for="filter-attack">Filter Attack: <span id="filter-attack-value">0.1</span>s <span class="info-icon"
-                title="Time for filter sweep to reach peak after key press.">ℹ️</span></label>
-            <input type="range" id="filter-attack" min="0" max="2" step="0.01" value="0.1">
-          </div>
-          <div class="control-group">
-            <label for="filter-decay">Filter Decay: <span id="filter-decay-value">0.2</span>s <span class="info-icon"
-                title="Time for filter sweep to return to cutoff frequency.">ℹ️</span></label>
-            <input type="range" id="filter-decay" min="0" max="2" step="0.01" value="0.2">
-          </div>
-        </div>
-      </section>
-
-      <!-- Amplitude Envelope Section -->
-      <section class="control-section">
-        <h2>📊 Amplitude Envelope (ADSR) <span class="info-icon"
-            title="Controls volume over time. Shapes how notes start, sustain, and end.">ℹ️</span></h2>
-        <div class="controls-grid">
-          <div class="control-group">
-            <label for="attack">Attack: <span id="attack-value">0.01</span>s <span class="info-icon"
-                title="Time to reach full volume. Fast = percussive, slow = soft/pad-like.">ℹ️</span></label>
-            <input type="range" id="attack" min="0" max="2" step="0.01" value="0.01">
-          </div>
-          <div class="control-group">
-            <label for="decay">Decay: <span id="decay-value">0.1</span>s <span class="info-icon"
-                title="Time to drop from peak to sustain level after attack.">ℹ️</span></label>
-            <input type="range" id="decay" min="0" max="2" step="0.01" value="0.1">
-          </div>
-          <div class="control-group">
-            <label for="sustain">Sustain: <span id="sustain-value">0.7</span> <span class="info-icon"
-                title="Volume level while holding a key. 1.0 = full volume.">ℹ️</span></label>
-            <input type="range" id="sustain" min="0" max="1" step="0.01" value="0.7">
-          </div>
-          <div class="control-group">
-            <label for="release">Release: <span id="release-value">0.3</span>s <span class="info-icon"
-                title="Fade-out time after releasing a key. Long = ambient tail.">ℹ️</span></label>
-            <input type="range" id="release" min="0" max="3" step="0.01" value="0.3">
-          </div>
-        </div>
-      </section>
-
-      <!-- LFO Section -->
-      <section class="control-section">
-        <h2>〰️ LFO (Modulation) <span class="info-icon"
-            title="Low Frequency Oscillator adds movement and life. Creates vibrato, tremolo, and filter sweeps.">ℹ️</span>
-        </h2>
-        <div class="controls-grid">
-          <div class="control-group">
-            <label for="lfo-wave">LFO Wave <span class="info-icon"
-                title="Modulation shape: Sine (smooth), Square (on/off), Saw (ramp), Triangle (linear up/down)">ℹ️</span></label>
-            <select id="lfo-wave">
-              <option value="sine" selected>Sine</option>
-              <option value="square">Square</option>
-              <option value="sawtooth">Sawtooth</option>
-              <option value="triangle">Triangle</option>
-            </select>
-          </div>
-          <div class="control-group">
-            <label for="lfo-rate">LFO Rate: <span id="lfo-rate-value">5</span> Hz <span class="info-icon"
-                title="Speed of modulation. Low = slow sweeps, high = wild wobbles.">ℹ️</span></label>
-            <input type="range" id="lfo-rate" min="0.1" max="20" step="0.1" value="5">
-          </div>
-          <div class="control-group">
-            <label for="lfo-pitch-depth">Pitch Depth: <span id="lfo-pitch-depth-value">0</span> <span class="info-icon"
-                title="Vibrato amount. Modulates pitch up and down (15-30 = subtle vibrato).">ℹ️</span></label>
-            <input type="range" id="lfo-pitch-depth" min="0" max="100" value="0">
-          </div>
-          <div class="control-group">
-            <label for="lfo-filter-depth">Filter Depth: <span id="lfo-filter-depth-value">0</span> <span
-                class="info-icon"
-                title="Auto-wah amount. Sweeps filter cutoff (500-2500 = wah effect).">ℹ️</span></label>
-            <input type="range" id="lfo-filter-depth" min="0" max="5000" value="0">
-          </div>
-          <div class="control-group">
-            <label for="lfo-amp-depth">Amp Depth: <span id="lfo-amp-depth-value">0</span> <span class="info-icon"
-                title="Tremolo amount. Modulates volume (20-40 = subtle pulsing).">ℹ️</span></label>
-            <input type="range" id="lfo-amp-depth" min="0" max="100" value="0">
-          </div>
-        </div>
-      </section>
-
-      <!-- Effects Section -->
-      <section class="control-section">
-        <h2>✨ Effects <span class="info-icon"
-            title="Time-based and modulation effects add space, depth, and texture to your sound.">ℹ️</span>
-        </h2>
-        <div class="controls-grid">
-          <div class="control-group">
-            <label for="distortion-drive">Distortion: <span id="distortion-drive-value">0</span> <span class="info-icon"
-                title="Adds harmonic saturation and grit. Low = warmth, high = aggressive.">ℹ️</span></label>
-            <input type="range" id="distortion-drive" min="0" max="100" value="0">
-          </div>
-          <div class="control-group">
-            <label for="chorus-rate">Chorus Rate: <span id="chorus-rate-value">0.5</span> Hz <span class="info-icon"
-                title="Speed of chorus modulation. Creates thickness and width.">ℹ️</span></label>
-            <input type="range" id="chorus-rate" min="0.1" max="5" step="0.1" value="0.5">
-          </div>
-          <div class="control-group">
-            <label for="chorus-depth">Chorus Depth: <span id="chorus-depth-value">0</span> <span class="info-icon"
-                title="Amount of chorus effect. Adds stereo width and shimmer.">ℹ️</span></label>
-            <input type="range" id="chorus-depth" min="0" max="100" value="0">
-          </div>
-          <div class="control-group">
-            <label for="flanger-rate">Flanger Rate: <span id="flanger-rate-value">0.3</span> Hz <span class="info-icon"
-                title="Speed of flanger sweep. Creates jet/whoosh effects.">ℹ️</span></label>
-            <input type="range" id="flanger-rate" min="0.1" max="5" step="0.1" value="0.3">
-          </div>
-          <div class="control-group">
-            <label for="flanger-depth">Flanger Depth: <span id="flanger-depth-value">0</span> <span class="info-icon"
-                title="Amount of flanger effect. Higher = more dramatic sweep.">ℹ️</span></label>
-            <input type="range" id="flanger-depth" min="0" max="100" value="0">
-          </div>
-          <div class="control-group">
-            <label for="flanger-feedback">Flanger Feedback: <span id="flanger-feedback-value">50</span>%
-              <span class="info-icon" title="Resonance of flanger. Higher = more metallic character.">ℹ️</span></label>
-            <input type="range" id="flanger-feedback" min="0" max="95" value="50">
-          </div>
-          <div class="control-group">
-            <label for="delay-time">Delay Time: <span id="delay-time-value">0.3</span>s <span class="info-icon"
-                title="Time between echo repeats. Match to tempo for rhythmic effects.">ℹ️</span></label>
-            <input type="range" id="delay-time" min="0" max="1" step="0.01" value="0.3">
-          </div>
-          <div class="control-group">
-            <label for="delay-feedback">Delay Feedback: <span id="delay-feedback-value">30</span>% <span
-                class="info-icon" title="Number of echo repeats. Higher = more echoes.">ℹ️</span></label>
-            <input type="range" id="delay-feedback" min="0" max="90" value="30">
-          </div>
-          <div class="control-group">
-            <label for="delay-mix">Delay Mix: <span id="delay-mix-value">0</span>% <span class="info-icon"
-                title="Blend of delay effect. 0 = off, 100 = all delay.">ℹ️</span></label>
-            <input type="range" id="delay-mix" min="0" max="100" value="0">
-          </div>
-          <div class="control-group">
-            <label for="reverb-mix">Reverb Mix: <span id="reverb-mix-value">0</span>% <span class="info-icon"
-                title="Room/space effect. Low = tight, high = ambient/spacious.">ℹ️</span></label>
-            <input type="range" id="reverb-mix" min="0" max="100" value="0">
-          </div>
-          <div class="control-group">
-            <label for="master-volume">Master Volume: <span id="master-volume-value">50</span>% <span class="info-icon"
-                title="Overall output level. Start at 50% and adjust to taste.">ℹ️</span></label>
-            <input type="range" id="master-volume" min="0" max="100" value="50">
-          </div>
-        </div>
-      </section>
     </div>
   </div>
 
